@@ -10,7 +10,6 @@ public:
     void RTCLoop();
 
 private:
-
     RTC_DS1307 rtc;
 
     char daysOfTheWeek[7][12] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
