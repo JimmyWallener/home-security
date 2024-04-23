@@ -2,6 +2,18 @@
 #include <RTClib.h>
 #include <LiquidCrystal.h>
 
+// Time structure to hold the date and time information
+struct DateTimeInfo
+{
+    int year;
+    int month;
+    int day;
+    int hour;
+    int minutes;
+    int seconds;
+    int dayOfWeek;
+};
+
 class RTC
 {
 public:
@@ -9,17 +21,20 @@ public:
     void RTCSetup();
     void RTCLoop();
 
+    // Setter & Getter
+    void SetTime(const DateTimeInfo& dt);
+    DateTimeInfo GetTime();
+
 private:
     RTC_DS1307 rtc;
+    // LiquidCrystal lcd;
+    DateTimeInfo currentTime;
 
-    char daysOfTheWeek[7][12] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
-
-    int year;
-    int month;
-    int day;
-    int hour;
-    int minutes;
-    int seconds;
+    // Helper function to sync the structured time to RTC hardware
+    void SyncTimeToRTC();
+    // Helper function to sync time from RTC hardware to the structured time
+    void SyncTimeFromRTC();
+    const char* daysOfTheWeek[7] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 
     // Initialize the LCD library by associating any needed LCD interface pin
     // with the arduino pin number it is connected to
