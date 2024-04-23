@@ -4,9 +4,7 @@ RTC::RTC() {}
 
 void RTC::RTCInitialize()
 {
-    // Set up the LCD's number of columns & rows
-    lcd.begin(16, 2);
-
+    lcdDisplay.LCDInitialize();
     if (!rtc.begin())
     {
         Serial.println("Couldn't find RTC");
@@ -23,33 +21,36 @@ void RTC::RTCUpdate()
     // Sync time from RTC to our currentTime structure
     SyncTimeFromRTC();
 
-    // Set the cursor to column 0, line 0
-    lcd.setCursor(0, 0);
+    // Update the LCD
+    lcdDisplay.LCDUpdate(currentTime);
 
-    // Print abbreviated day of the week
-    lcd.print(daysOfTheWeek[currentTime.dayOfWeek]);
+    // // Set the cursor to column 0, line 0
+    // lcd.setCursor(0, 0);
 
-    // Space between day and date
-    lcd.print(" ");
+    // // Print abbreviated day of the week
+    // lcd.print(daysOfTheWeek[currentTime.dayOfWeek]);
 
-    // Date in DD/MM format
-    lcd.print(currentTime.day < 10 ? "0" : "");
-    lcd.print(currentTime.day);
-    lcd.print("/");
-    lcd.print(currentTime.month < 10 ? "0" : "");
-    lcd.print(currentTime.month);
-    lcd.print(" ");
-    lcd.print(currentTime.year);
+    // // Space between day and date
+    // lcd.print(" ");
 
-    // Move to the next line and print the time in HH:MM format
-    lcd.setCursor(0, 1);
+    // // Date in DD/MM format
+    // lcd.print(currentTime.day < 10 ? "0" : "");
+    // lcd.print(currentTime.day);
+    // lcd.print("/");
+    // lcd.print(currentTime.month < 10 ? "0" : "");
+    // lcd.print(currentTime.month);
+    // lcd.print(" ");
+    // lcd.print(currentTime.year);
 
-    // Time in HH:MM format
-    lcd.print(currentTime.hour < 10 ? "0" : "");
-    lcd.print(currentTime.hour);
-    lcd.print(":");
-    lcd.print(currentTime.minutes < 10 ? "0" : "");
-    lcd.print(currentTime.minutes);
+    // // Move to the next line and print the time in HH:MM format
+    // lcd.setCursor(0, 1);
+
+    // // Time in HH:MM format
+    // lcd.print(currentTime.hour < 10 ? "0" : "");
+    // lcd.print(currentTime.hour);
+    // lcd.print(":");
+    // lcd.print(currentTime.minutes < 10 ? "0" : "");
+    // lcd.print(currentTime.minutes);
 }
 
 void RTC::SetTime(const DateTimeInfo& dt)

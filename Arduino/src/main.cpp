@@ -7,10 +7,10 @@ RTC rtc;
 void setup() {
   // put your setup code here, to run once:
   while (!Serial);
-  rtc.RTCSetup();
+  rtc.RTCInitialize();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  rtc.RTCLoop();
+  rtc.RTCUpdate();
 }
