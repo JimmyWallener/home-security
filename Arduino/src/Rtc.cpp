@@ -2,7 +2,7 @@
 
 RTC::RTC() {}
 
-void RTC::RTCSetup()
+void RTC::RTCInitialize()
 {
     // Set up the LCD's number of columns & rows
     lcd.begin(16, 2);
@@ -18,7 +18,7 @@ void RTC::RTCSetup()
     SyncTimeFromRTC();
 }
 
-void RTC::RTCLoop()
+void RTC::RTCUpdate()
 {
     // Sync time from RTC to our currentTime structure
     SyncTimeFromRTC();

@@ -18,8 +18,8 @@ class RTC
 {
 public:
     RTC();
-    void RTCSetup();
-    void RTCLoop();
+    void RTCInitialize();
+    void RTCUpdate();
 
     // Setter & Getter
     void SetTime(const DateTimeInfo& dt);
