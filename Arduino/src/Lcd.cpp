@@ -1,4 +1,4 @@
-#include <Lcd.h>
+#include "Lcd.h"
 
 LCD::LCD() {}
 
@@ -14,7 +14,6 @@ void LCD::LCDUpdate(const DateTimeInfo& dt)
     lcd.setCursor(0, 0);
     // Print abbreviated day of the week
     lcd.print(daysOfTheWeek[dt.dayOfWeek]);
-    // lcd.print(daysOfTheWeek[currentTime.dayOfWeek]);
 
     // Space between day and date
     lcd.print(" ");

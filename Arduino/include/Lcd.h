@@ -1,6 +1,6 @@
 #pragma once
 #include <LiquidCrystal.h>
-#include <DateTimeInfo.h>
+#include "Structs/DateTimeInfo.h"
 
 class LCD
 {

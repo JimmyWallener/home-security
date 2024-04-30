@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include "Rtc.h"
 #include <SPI.h>
+#include "Rtc.h"
 
 RTC rtc;
 

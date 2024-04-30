@@ -1,7 +1,7 @@
 #pragma once
 #include <RTClib.h>
-#include <Lcd.h>
-#include <DateTimeInfo.h>
+#include "Structs/DateTimeInfo.h"
+#include "Lcd.h"
 
 class RTC
 {
