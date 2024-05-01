@@ -12,8 +12,10 @@ void LCD::LCDUpdate(const DateTimeInfo& dt)
 {
     // Set the cursor to column 0, line 0
     lcd.setCursor(0, 0);
+  
     // Print abbreviated day of the week
     lcd.print(_daysOfTheWeek[dt.dayOfWeek]);
+
 
     // Space between day and date
     lcd.print(" ");
