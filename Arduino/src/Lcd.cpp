@@ -1,6 +1,6 @@
-#include <Lcd.h>
+#include "LCD.h"
 
-LCD::LCD() {}
+LCD::LCD(){};
 
 void LCD::LCDInitialize()
 {
@@ -12,9 +12,10 @@ void LCD::LCDUpdate(const DateTimeInfo& dt)
 {
     // Set the cursor to column 0, line 0
     lcd.setCursor(0, 0);
+  
     // Print abbreviated day of the week
-    lcd.print(daysOfTheWeek[dt.dayOfWeek]);
-    // lcd.print(daysOfTheWeek[currentTime.dayOfWeek]);
+    lcd.print(_daysOfTheWeek[dt.dayOfWeek]);
+
 
     // Space between day and date
     lcd.print(" ");
@@ -38,3 +39,5 @@ void LCD::LCDUpdate(const DateTimeInfo& dt)
     lcd.print(dt.minutes < 10 ? "0" : "");
     lcd.print(dt.minutes);
 }
+
+// Skriven av: Joakim Sjöström

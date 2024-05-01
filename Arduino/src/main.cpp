@@ -1,16 +1,19 @@
 #include <Arduino.h>
-#include "Rtc.h"
-#include <SPI.h>
+#include "../include/Struct/SensorData.h"
+#include "../include/Struct/Components.h"
 
-RTC rtc;
+SensorData sensorData;
+Components components;
+
 
 void setup() {
-  // put your setup code here, to run once:
-  while (!Serial);
-  rtc.RTCInitialize();
+    // put your setup code here, to run once:
+    Serial.begin(9600);
+    initializeSensorData(&sensorData, 3, 4);
+    initializeComponents(&components);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  rtc.RTCUpdate();
+    updateSensorData(&sensorData);
+    delay(1000);
 }
