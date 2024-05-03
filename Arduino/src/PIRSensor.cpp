@@ -3,6 +3,7 @@
 
 PIRSensor::PIRSensor(uint32_t pin) {
     pinMode(pin, INPUT);
+    _pin = pin;
 }
 
 // Method to activate the sensor

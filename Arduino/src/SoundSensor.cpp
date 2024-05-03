@@ -5,6 +5,7 @@
 
 SoundSensor::SoundSensor(uint8_t ditigtalPinNumber){
     pinMode(ditigtalPinNumber, INPUT);
+    this->_ditigtalPinNumber = ditigtalPinNumber;
 }
 
 void SoundSensor::activateSoundSensor(){
