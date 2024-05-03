@@ -12,6 +12,7 @@ struct Components {
 };
 
 void initializeComponents(Components* components) {
+    components->lcdDisplay = LCD(12, 11, 5, 4, 3, 2);
     components->rtc.RTCInitialize();
     components->lcdDisplay.LCDInitialize();
     components->buzzer.initialize();

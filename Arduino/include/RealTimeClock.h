@@ -1,7 +1,6 @@
 #pragma once
 #include <RTClib.h>
 #include "Struct/DateTimeInfo.h"
-#include "LCD.h"
 
 class RTC
 {
@@ -17,7 +16,6 @@ public:
 private:
     RTC_DS1307 rtc;
     DateTimeInfo currentTime;
-    LCD lcdDisplay;
 
     // Helper function to sync the structured time to RTC hardware
     void SyncTimeToRTC();

@@ -8,7 +8,7 @@ class Buzzer{
         uint16_t _delayTime;
 
     public:
-        Buzzer() : _buzzerPin(8), _delayTime(205){};
+        Buzzer() : _buzzerPin(-1), _delayTime(205){};
         Buzzer(uint8_t buzzerPin, uint16_t delayTime);
         void initialize();
         void playAlarm();

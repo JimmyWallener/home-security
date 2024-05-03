@@ -4,7 +4,7 @@ RTC::RTC() {}
 
 void RTC::RTCInitialize()
 {
-    lcdDisplay.LCDInitialize();
+    
     if (!rtc.begin())
     {
         Serial.println("Couldn't find RTC");
@@ -21,15 +21,10 @@ void RTC::RTCUpdate()
     // Sync time from RTC to our currentTime structure
     SyncTimeFromRTC();
 
-    // Update the LCD
-    lcdDisplay.LCDUpdate(currentTime);
+  
 }
 
-void RTC::SetTime(const DateTimeInfo& dt)
-{
-    currentTime = dt;
-    SyncTimeToRTC();
-}
+
 
 DateTimeInfo RTC::GetTime()
 {
