@@ -1,15 +1,18 @@
 #include "LCD.h"
+#include <Arduino.h>
 
-LCD::LCD(){};
+
 
 void LCD::LCDInitialize()
 {
+    
     // Set up the LCD's number of columns & rows
     lcd.begin(16, 2);
 }
 
 void LCD::LCDUpdate(const DateTimeInfo& dt)
 {
+    Serial.println(dt.dayOfWeek);
     // Set the cursor to column 0, line 0
     lcd.setCursor(0, 0);
   

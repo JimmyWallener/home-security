@@ -1,7 +1,10 @@
 #include "PIRSensor.h"
 
-// Default constructor due to SensorData struct
-PIRSensor::PIRSensor(uint32_t pin) : _pin(pin), _lastTriggerTime(0), _triggerThreshold(1000), _isActive(false){}
+
+PIRSensor::PIRSensor(uint32_t pin) {
+    pinMode(pin, INPUT);
+    _pin = pin;
+}
 
 // Method to activate the sensor
 void PIRSensor::activate()
