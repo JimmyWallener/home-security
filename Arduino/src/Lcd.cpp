@@ -5,20 +5,19 @@
 
 void LCD::LCDInitialize()
 {
-    
+    int columnIndex = 16;
+    int rowIndex = 2;
     // Set up the LCD's number of columns & rows
-    lcd.begin(16, 2);
+    lcd.begin(columnIndex, rowIndex);
 }
 
 void LCD::LCDUpdate(const DateTimeInfo& dt)
 {
-    Serial.println(dt.dayOfWeek);
     // Set the cursor to column 0, line 0
     lcd.setCursor(0, 0);
   
     // Print abbreviated day of the week
     lcd.print(_daysOfTheWeek[dt.dayOfWeek]);
-
 
     // Space between day and date
     lcd.print(" ");

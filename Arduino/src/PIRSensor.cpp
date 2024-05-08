@@ -1,30 +1,70 @@
+/***
+ * @file PIRSensor.cpp
+ * @brief Implementation of the PIRSensor class
+ * @author Jimmy Wallener
+ * @date 2024-04-27
+ * 
+*/
 #include "PIRSensor.h"
 
+
+
+/**
+ * @brief class constructor for the passive IR sensor
+ * @details This method constructs a new passive IR sensor object with the given pin and sets the pin mode to INPUT
+ * @param pin
+ * @return * PIRSensor
+ * 
+ */
 
 PIRSensor::PIRSensor(uint32_t pin) {
     pinMode(pin, INPUT);
     _pin = pin;
 }
 
-// Method to activate the sensor
+/**
+ * @brief activate the passive IR sensor
+ * @details This method activates the passive IR sensor by attaching an interrupt to the sensor pin
+ * 
+ * @return void
+ * 
+ */
 void PIRSensor::activate()
 {
     attachInterrupt(digitalPinToInterrupt(_pin), handleStaticInterrupt, RISING);
     _isActive = true;
 }
 
-// Method to deactivate the sensor
+/**
+ * @brief deactivate the passive IR sensor
+ * @details This method deactivates the passive IR sensor by detaching the interrupt from the sensor pin
+ * 
+ * @return void
+ * 
+ */
 void PIRSensor::deactivate() {
     detachInterrupt(digitalPinToInterrupt(_pin));
     _isActive = false;
 }
 
-// Method to set the trigger threshold
+/**
+ * @brief set the trigger threshold for the sensor
+ * @details This method sets the trigger threshold for the sensor
+ * @param threshold 
+ * @return ** void 
+ */
 void PIRSensor::setTriggerThreshold(unsigned long threshold) {
     _triggerThreshold = threshold;
 }
 
-// Update method to check if the sensor is triggered
+/**
+ * @brief update the sensor state based on the current state of the sensor pin
+ * @details This method is called by the interrupt handler to update the sensor state based on the current state of the sensor pin and the trigger threshold
+ * 
+ * @return ** void
+ * 
+ * @todo implement the logic to send data to the ESP32 through Serial
+ */
 void PIRSensor::update() {
     if (_isActive && digitalRead(_pin) == HIGH) {
         unsigned long currentTime = millis();
@@ -38,14 +78,23 @@ void PIRSensor::update() {
     Serial.println("PIR Sensor Not Triggered");
 }
 
-// Method to handle the interrupt
+/**
+ * @brief interrupt handler for the passive IR sensor
+ * @details This method is called by the interrupt handler to update the sensor state
+ * 
+ * @return ** void 
+ */
 void PIRSensor::_handleInterrupt() {
     if (_isActive) {
         update();
     }
 }
 
-// Static method to handle interrupts
+/**
+ * @brief static interrupt handler for the passive IR sensor
+ * @details This method is called by the interrupt handler to update the sensor state
+ * @return ** void 
+ */
 void PIRSensor::handleStaticInterrupt() {
     static PIRSensor* pirSensorInstance = nullptr;
     if (pirSensorInstance != nullptr) {
@@ -53,5 +102,3 @@ void PIRSensor::handleStaticInterrupt() {
     }
    
 }
-
-// Skriven av: Jimmy Wallener

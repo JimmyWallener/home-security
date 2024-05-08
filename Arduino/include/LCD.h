@@ -14,7 +14,7 @@ private:
     // Initialize the LCD library by associating any needed LCD interface pin
     // with the arduino pin number it is connected to
     LiquidCrystal lcd;
-    const char *_daysOfTheWeek[7] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+    const char *_daysOfTheWeek[7] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 };
 
 // Skriven av: Joakim Sjöström

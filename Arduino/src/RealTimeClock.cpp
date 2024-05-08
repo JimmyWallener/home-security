@@ -1,6 +1,23 @@
+/**
+ * @file RealTimeClock.cpp
+ * @author Joakim Sjöström
+ * @brief RealTimeClock class implementation
+ * @date 2024-05-06
+ * 
+ * 
+ */
+
+
 #include "RealTimeClock.h"
 
 RTC::RTC() {}
+
+
+/**
+ * @brief Initialize the RTC hardware
+ * @details This method initializes the RTC hardware and syncs the time to the RTC
+ * @return void
+ */
 
 void RTC::RTCInitialize()
 {
@@ -13,18 +30,27 @@ void RTC::RTCInitialize()
     }
 
     // Initial sync from RTC
-    SyncTimeFromRTC();
+    SyncTimeToRTC();
 }
+
+/**
+ * @brief update the RTC time
+ * @details This method updates the RTC time
+ * @return void
+ */
 
 void RTC::RTCUpdate()
 {
     // Sync time from RTC to our currentTime structure
     SyncTimeFromRTC();
-
-  
 }
 
-
+/**
+ * @brief get the current time from the RTC
+ * @details This method gets the current time from the RTC
+ * 
+ * @return ** DateTimeInfo 
+ */
 
 DateTimeInfo RTC::GetTime()
 {
@@ -32,12 +58,24 @@ DateTimeInfo RTC::GetTime()
     return currentTime;
 }
 
+
+/**
+ * @brief Initialize the RTC hardware and sync the time to the RTC
+ * @details This method initializes the RTC hardware and syncs the time to the RTC
+ * @return void
+ */
+
 void RTC::SyncTimeToRTC()
 {
     // Convert the DateTimeInfo to DateTime format and set it to RTC
-    rtc.adjust(DateTime(currentTime.year, currentTime.month, currentTime.day,
-                        currentTime.hour, currentTime.minutes, currentTime.seconds));
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 }
+
+/**
+ * @brief Sync the time from RTC hardware to the structured time
+ * @details This method syncs the time from RTC hardware to the structured time
+ * @return void
+ */
 
 void RTC::SyncTimeFromRTC()
 {
@@ -52,5 +90,3 @@ void RTC::SyncTimeFromRTC()
     // Update the day of the week
     currentTime.dayOfWeek = now.dayOfTheWeek();
 }
-
-// Skriven av: Joakim Sjöström

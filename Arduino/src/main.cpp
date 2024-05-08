@@ -21,6 +21,7 @@ void setup() {
 void loop() {
     updateSensorData(&sensorData);
     components.rtc.RTCUpdate();
+    Serial.println(components.rtc.GetTime().year);
     components.lcdDisplay.LCDUpdate(components.rtc.GetTime());
     delay(1000);
 }
