@@ -65,16 +65,17 @@ void PIRSensor::setTriggerThreshold(unsigned long threshold) {
  * 
  * @todo implement the logic to send data to the ESP32 through Serial
  */
-void PIRSensor::update() {
+int PIRSensor::update() {
     if (_isActive && digitalRead(_pin) == HIGH) {
         unsigned long currentTime = millis();
         if (currentTime - _lastTriggerTime > _triggerThreshold) {
             _lastTriggerTime = currentTime;
             Serial.println("PIR Sensor Triggered");
-            // Send data to ESP32 through Serial
+            return 1;
         }
 
     }
+    return 0;
     Serial.println("PIR Sensor Not Triggered");
 }
 

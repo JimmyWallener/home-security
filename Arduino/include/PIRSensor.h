@@ -9,7 +9,7 @@ public:
     PIRSensor(uint32_t pin);
     void activate();
     void deactivate();
-    void update();
+    int update();
     void setTriggerThreshold(unsigned long threshold);
 
 private:

@@ -8,9 +8,8 @@
  * 
  */
 
-
-#include "WiFiConnection.h"
-#include <Arduino.h>
+//#include "WiFiConnection.h"
+//#include <Arduino.h>
 
 
 
@@ -20,19 +19,19 @@
  * @return ** void 
  * @todo ** Add a check to see if the connection was successful, send message to lcd display on Arduino
  */
-void WiFiConnection::initWiFi() {
-  Serial.begin(115200);
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(wifiConfig.ssid, wifiConfig.password);
-  WiFi.setAutoReconnect(true);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
+//void WiFiConnection::initWiFi() {
+  //Serial.begin(115200);
+  //WiFi.mode(WIFI_STA);
+  //WiFi.begin(wifiConfig.ssid, wifiConfig.password);
+  //WiFi.setAutoReconnect(true);
+  //while (WiFi.status() != WL_CONNECTED) {
+    //delay(1000);
 
     
-    Serial.write("Connecting to WiFi");
-  }
+    //Serial.write("Connecting to WiFi");
+  //}
   
-};
+//};
 
 /**
  * @brief ** Print WiFi status
@@ -41,14 +40,14 @@ void WiFiConnection::initWiFi() {
  * @todo ** Add a check to see if the connection was successful, send message to lcd display on Arduino
  */
 
-void WiFiConnection::printWiFiStatus() {
-  if(WiFi.status() == WL_CONNECTED) {
-    Serial.write("Connected to WiFi, IP address: ");
-    Serial.write(WiFi.localIP());
-  } else {
-    Serial.write("Not connected to WiFi");
-  }
-};
+//void WiFiConnection::printWiFiStatus() {
+  //if(WiFi.status() == WL_CONNECTED) {
+    //Serial.write("Connected to WiFi, IP address: ");
+    //Serial.write(WiFi.localIP());
+  //} else {
+    //Serial.write("Not connected to WiFi");
+  //}
+//};
 
 
 /**
@@ -57,10 +56,10 @@ void WiFiConnection::printWiFiStatus() {
  * @return ** void 
  * @todo ** Add a check to see if the connection was successful, send message to lcd display on Arduino
  */
-void WiFiConnection::reconnectWiFi() {
-  WiFi.reconnect();
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.write("Reconnecting to WiFi");
-  }
-};
+//void WiFiConnection::reconnectWiFi() {
+ // WiFi.reconnect();
+  //while (WiFi.status() != WL_CONNECTED) {
+    //delay(1000);
+    //Serial.write("Reconnecting to WiFi");
+  //}
+//};

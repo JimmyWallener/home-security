@@ -10,8 +10,8 @@ class SoundSensor{
 
     public:
         SoundSensor() : _digitalValue(0), _ditigtalPinNumber(0){};
-        SoundSensor(uint8_t ditigtalPinNumber);
-        void activateSoundSensor();
+        void initialize(uint8_t ditigtalPinNumber);
+        int readSoundSensor();
 };
 
 // Skriven av: Leo Katakalidis

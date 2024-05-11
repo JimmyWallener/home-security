@@ -17,11 +17,10 @@
  * @param ditigtalPinNumber 
  */
 
-SoundSensor::SoundSensor(uint8_t ditigtalPinNumber){
+void SoundSensor::initialize(uint8_t ditigtalPinNumber){
     pinMode(ditigtalPinNumber, INPUT);
     this->_ditigtalPinNumber = ditigtalPinNumber;
 }
-
 
 /**
  * @brief Method to activate the sound sensor
@@ -29,12 +28,12 @@ SoundSensor::SoundSensor(uint8_t ditigtalPinNumber){
  * @return void
  * @todo Implement alarm logic for when alarm is active and in-active
  */
-void SoundSensor::activateSoundSensor(){
+int SoundSensor::readSoundSensor(){
         this->_digitalValue = digitalRead(_ditigtalPinNumber);
 
         if(this->_digitalValue == HIGH){
-            // insert alarm logic here for when alarm is active
+            return 1;
         }else{
-            // insert alarm logic here for when alarm is in-active
+            return 0;
         }
 }

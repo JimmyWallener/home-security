@@ -7,15 +7,12 @@
 struct SensorData {
     PIRSensor pirSensor;
     SoundSensor soundSensor;
-    
 };
-
 
 void initializeSensorData(SensorData* sensorData, uint32_t pirPin, uint32_t soundPin) {
     sensorData->pirSensor = PIRSensor(pirPin);
-    sensorData->soundSensor = SoundSensor(soundPin);
     sensorData->pirSensor.activate();
-    sensorData->soundSensor.activateSoundSensor();
+    sensorData->soundSensor.initialize(-1);
 }
 
 void updateSensorData(SensorData* sensorData) {
