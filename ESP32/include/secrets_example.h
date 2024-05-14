@@ -6,8 +6,8 @@
 // #ifndef SECRETS_H
 // #define SECRETS_H
 
-// #define WIFI_SSID ""; // your network SSID (name)
-// #define WIFI_PASSWORD ""; // your network password
+// const char* WIFI_SSID = ""; // your network SSID (name)
+// const char* WIFI_PASSWORD = ""; // your network password
 // #define MQTT_SERVER_ADDRESS ""; // your MQTT server IP address
 // #define MQTT_SERVER_PORT 1883 // your MQTT server port
 // #define MQTT_USERNAME ""; // your MQTT username

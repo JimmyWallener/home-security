@@ -1,39 +1,29 @@
-/**
- * @file SoundSensor.cpp
- * @author Leo Katakalidis
- * @brief Implementation of the SoundSensor class
- * @date 2024-05-06
- * 
- * 
- */
-
-
 #include "SoundSensor.h"
 #include <Arduino.h>
 
-/**
- * @brief Construct a new Sound Sensor:: Sound Sensor object
- * @details This method constructs a new sound sensor object with the given pin and sets the pin mode to INPUT
- * @param ditigtalPinNumber 
- */
+SoundSensor::SoundSensor(uint8_t digitalPinNumber) : _digitalPinNumber(digitalPinNumber) {}
 
-void SoundSensor::initialize(uint8_t ditigtalPinNumber){
+void SoundSensor::begin() {
+    pinMode(_digitalPinNumber, INPUT);
+}
+
+bool SoundSensor::isSoundDetected() {
+    _digitalValue = digitalRead(_digitalPinNumber);
+    return _digitalValue == HIGH;
+}
+
+/*
+SoundSensor::SoundSensor(uint8_t ditigtalPinNumber){
     pinMode(ditigtalPinNumber, INPUT);
-    this->_ditigtalPinNumber = ditigtalPinNumber;
+    this->ditigtalPinNumber = ditigtalPinNumber;
 }
 
-/**
- * @brief Method to activate the sound sensor
- * @details This method activates the sound sensor by reading the digital value of the sensor pin
- * @return void
- * @todo Implement alarm logic for when alarm is active and in-active
- */
-int SoundSensor::readSoundSensor(){
-        this->_digitalValue = digitalRead(_ditigtalPinNumber);
+void SoundSensor::activateSoundSensor(){
+        this->digitalValue = digitalRead(ditigtalPinNumber);
 
-        if(this->_digitalValue == HIGH){
-            return 1;
+        if(this->digitalValue == HIGH){
+            // insert alarm logic here for when alarm is active
         }else{
-            return 0;
+            // insert alarm logic here for when alarm is in-active
         }
-}
+}*/

@@ -1,37 +1,33 @@
-// #include "WiFiConnection.h"
 #include <Arduino.h>
-#include <Keypad.h>
-#include <Wire.h>
-#include "../include/AlarmSystem.h"
-#include "../include/Numpad.h"
-// This is a MASTER unit
+#include "Numpad.h"
+#include "RealTimeClock.h"
+#include "ESP32Comm.h"
+#include "WiFiConnection.h"
+#include "secrets.h"
+#include <SPI.h>
 
-// WiFiConnection wifi;
 
-AlarmSystem alarmsystem;
-Keypad numpad = initializeKeypad();
+RealTimeClock rtc;
+ESP32Comm esp32Comm(A4, A5); // SDA, SCL pins for ESP32
+WiFiConnection wifi;
 
 void setup() {
-  Serial.begin(115200);
-  Wire.begin();
-  //wifi.initWiFi();
+    Serial.begin(115200);
+
+    // Initialize components
+    
+    Wire1.begin(10, 11); // SDA, SCL pins for RTC
+    rtc.begin();
+    esp32Comm.begin();
+    wifi.connect(WIFI_SSID, WIFI_PASSWORD);
 }
 
-// Detta kan också snyggas till senare.
 void loop() {
-  if(numpad.getKey() == '#') {
-    Serial.println("Enter Password: "); // This will be on the lcd display later when connected. 
-    alarmsystem.getPassword(numpad);
-    alarmsystem.changeAlarmState();
-  }
-  if(alarmsystem.getState() == true) {
-    Wire.beginTransmission(4);
-    Wire.write(1);
-    Wire.endTransmission();
-  }
-  if(alarmsystem.getState() == false) {
-    Wire.beginTransmission(4);
-    Wire.write(0);
-    Wire.endTransmission();
-  }
+    
+
+    // Get current time from RTC and send to Arduino UNO
+    DateTime now = rtc.getCurrentTime();
+    esp32Comm.sendRtcData(now);
+
+    delay(1000); // Delay for 1 second
 }

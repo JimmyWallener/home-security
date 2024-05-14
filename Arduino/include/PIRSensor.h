@@ -1,17 +1,18 @@
-#ifndef PIRSensors_h
-#define PIRSensors_h
+#ifndef PIRSENSOR_H
+#define PIRSENSOR_H
 
 #include <Arduino.h>
 
-class PIRSensor{
+class PIRSensor {
 public:
-    PIRSensor() : _pin(-1), _lastTriggerTime(0), _triggerThreshold(10000), _isActive(false){};
+    PIRSensor() : _pin(-1), _lastTriggerTime(0), _triggerThreshold(10000), _isActive(false) {};
     PIRSensor(uint32_t pin);
+    void begin(); 
     void activate();
     void deactivate();
     int update();
     void setTriggerThreshold(unsigned long threshold);
-
+    bool isMotionDetected(); 
 private:
     uint32_t _pin;
     unsigned long _lastTriggerTime;
@@ -21,9 +22,7 @@ private:
     void _handleInterrupt();
 
     static void handleStaticInterrupt();
+    static PIRSensor* pirSensorInstance; // Static instance pointer
 };
 
-#endif // PIRSensors_h
-
-
-// Skriven av: Jimmy Wallener
+#endif // PIRSENSOR_H

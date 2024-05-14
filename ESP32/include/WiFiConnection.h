@@ -1,16 +1,11 @@
+#ifndef WIFICONNECTION_H
+#define WIFICONNECTION_H
+
 #include <WiFi.h>
-#include "secrets.h"
 
 class WiFiConnection {
-  public:
-      WiFiConnection() {};
-      void initWiFi();
-      void printWiFiStatus();
-      void reconnectWiFi();
-
-  private:
-        struct {
-            const char* ssid = WIFI_SSID;
-            const char* password = WIFI_PASSWORD;
-        } wifiConfig;
+public:
+    void connect(const char* ssid, const char* password);
 };
+
+#endif // WIFICONNECTION_H
