@@ -1,8 +1,11 @@
 #include "RealTimeClock.h"
+#include <Wire.h>
 
 RealTimeClock::RealTimeClock() {}
 
 void RealTimeClock::begin() {
+    Wire1.begin(10, 11); // SDA, SCL pins for RTC
+    rtc.begin(&Wire1);
     if (!rtc.begin(&Wire1)) {  // Use Wire1 for RTC communication
         Serial.println("Couldn't find RTC");
         while (1);
