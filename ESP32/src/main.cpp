@@ -8,7 +8,7 @@
 
 
 RealTimeClock rtc;
-ESP32Comm esp32Comm(A4, A5); // SDA, SCL pins for ESP32
+ESP32Comm esp32Comm;
 WiFiConnection wifi;
 
 void setup() {
@@ -27,8 +27,9 @@ void loop() {
 
     // Get current time from RTC and send to Arduino UNO
     DateTime now = rtc.getCurrentTime();
-    Serial.println(rtc.getFormattedTime());
     esp32Comm.sendRtcData(now);
 
     delay(1000); // Delay for 1 second
 }
+
+

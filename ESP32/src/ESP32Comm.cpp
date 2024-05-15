@@ -1,9 +1,9 @@
 #include "ESP32Comm.h"
 
-ESP32Comm::ESP32Comm(int sdaPin, int sclPin) : sdaPin(sdaPin), sclPin(sclPin) {}
+ESP32Comm::ESP32Comm() {}
 
 void ESP32Comm::begin() {
-    Wire.begin(sdaPin, sclPin);
+    Wire.begin();
 }
 
 void ESP32Comm::sendJsonData(const JsonDocument &doc) {
@@ -15,7 +15,7 @@ void ESP32Comm::sendJsonData(const JsonDocument &doc) {
 }
 
 void ESP32Comm::sendRtcData(const DateTime &now) {
-    Wire.beginTransmission(8); 
+    Wire.beginTransmission(8);
     Wire.write(now.year() - 2000); // year
     Wire.write(now.month());       // month
     Wire.write(now.day());         // day

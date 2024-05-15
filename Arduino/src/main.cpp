@@ -19,5 +19,6 @@ void loop() {
     }
 
     Serial.println(data.toJson());
-    delay(1000);
 }
+
+

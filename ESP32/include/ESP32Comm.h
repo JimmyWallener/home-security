@@ -7,10 +7,9 @@
 
 class ESP32Comm {
 private:
-    int sdaPin;
-    int sclPin;
+
 public:
-    ESP32Comm(int sdaPin, int sclPin);
+    ESP32Comm();
     void begin();
     void sendJsonData(const JsonDocument &doc);
     void sendRtcData(const DateTime &now);

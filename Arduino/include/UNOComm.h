@@ -14,7 +14,7 @@ public:
     String getRtcData();
 private:
     DateTime currentTime;
-    static UNOComm* instance; // För att hålla en pekare till den aktuella instansen
+    static UNOComm* instance; // Pointer to the current instance
 };
 
 #endif // UNOCOMM_H
