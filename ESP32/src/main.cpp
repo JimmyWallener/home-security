@@ -11,6 +11,8 @@ RealTimeClock rtc;
 ESP32Comm esp32Comm;
 WiFiConnection wifi;
 
+int lastMinute = -1; // Last minute that was sent to Arduino UNO
+
 void setup() {
     Serial.begin(115200);
 
@@ -23,13 +25,16 @@ void setup() {
 }
 
 void loop() {
-    
-
-    // Get current time from RTC and send to Arduino UNO
+    // Get current time from RTC and send it to Arduino UNO every minute
     DateTime now = rtc.getCurrentTime();
-    esp32Comm.sendRtcData(now);
+    int currentMinute = now.minute();
+    if (currentMinute != lastMinute) {
+        lastMinute = currentMinute;
+        esp32Comm.sendRtcData(now);
+    }
 
-    delay(1000); // Delay for 1 second
+    
+    delay(1000);
 }
 
 
