@@ -6,8 +6,8 @@ Keypad initializeKeypad() {
     const byte rowSize = 4;
     const byte colSize = 4;
 
-    byte rowPins[rowSize] = {2, 3, 4, 5};
-    byte colPins[rowSize] = {6, 7, 8, 9};
+    byte rowPins[rowSize] = {D2, D3, D4, D5};
+    byte colPins[rowSize] = {D6, D7, D8, D9};
 
     char hexaKeys[rowSize][colSize] = {
         {'1', '2', '3', 'A'},
