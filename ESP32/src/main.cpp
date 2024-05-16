@@ -32,7 +32,7 @@ void loop() {
         lastMinute = currentMinute;
         esp32Comm.sendRtcData(now);
     }
-
+    esp32Comm.sendAlarmStatusRequest();
     
     delay(1000);
 }
