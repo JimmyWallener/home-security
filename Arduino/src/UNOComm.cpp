@@ -2,15 +2,18 @@
 
 UNOComm* UNOComm::instance = nullptr;
 
-UNOComm::UNOComm() {
+UNOComm::UNOComm() : lcd(nullptr) {
     instance = this;
 }
 
 void UNOComm::begin() {
     Wire.begin(8); // Join I2C bus with address #8
-    Serial.println(Wire.peek());
     Wire.onReceive(onReceiveWrapper);
     Serial.println("UNOComm initialized and ready to receive data.");
+}
+
+void UNOComm::setLCD(LCD *lcd) {
+    this->lcd = lcd;
 }
 
 void UNOComm::onReceiveWrapper(int numBytes) {
@@ -56,11 +59,11 @@ void UNOComm::onReceive(int numBytes) {
    }
 }
 
+
 String UNOComm::getRtcData() {
     char buf1[] = "DD-MM-YYYY hh:mm:ss";
     return String(currentTime.toString(buf1));
 }
-
 
 void UNOComm::handleRTCData() {
 
@@ -71,7 +74,7 @@ void UNOComm::handleRTCData() {
     uint8_t minute = Wire.read();
     uint8_t second = Wire.read();
     currentTime = DateTime(year + 2000, month, day, hour, minute, second);
-    Serial.println("RTC Data received.");
+    
 }
 
  // Trigger Event if needed, method not complete
@@ -93,15 +96,26 @@ void UNOComm::handleJsonData() {
 }
 
 void UNOComm::handleAlarmActivation() {
-    // TODO: Implement alarm activation & write to LCD display.
+    // TODO: Create a countdown displayed in the LCD, then activate the alarm. But commented out disrupts date and time display
     // For now, just print a message
-    Serial.println("Alarm activated.");
+    // create a 5 second count down displayed in lcd
+    /* displayTemporaryMessage("Alarm activated in 5 seconds.", 1000);
+    delay(1000);
+    displayTemporaryMessage("Alarm activated in 4 seconds.", 1000);
+    delay(1000);
+    displayTemporaryMessage("Alarm activated in 3 seconds.", 1000);
+    delay(1000);
+    displayTemporaryMessage("Alarm activated in 2 seconds.", 1000);
+    delay(1000);
+    displayTemporaryMessage("Alarm activated in 1 seconds.", 1000);
+    delay(1000); */
+    displayTemporaryMessage("Alarm activated!", 5000);
 }
 
 void UNOComm::handleAlarmDeactivation() {
-    // TODO: Implement alarm deactivation & write to LCD display. 
+    // TODO: Implement alarm deactivation. 
     // For now, just print a message
-    Serial.println("Alarm deactivated.");
+    displayTemporaryMessage("Alarm deactivated.", 3000);
 }
 
 void UNOComm::handleAlarmStatusRequest() {
@@ -113,5 +127,34 @@ void UNOComm::handleAlarmStatusRequest() {
 void UNOComm::handlePinCodeFeedback() {
     // TODO: Implement pin code feedback handling.  Payload from ESP32 is a boolean and an integer: success and attempts left
     // For now, just print a message
-    Serial.println("Pin code feedback received.");
+    bool success = Wire.read();
+    int attemptsLeft = Wire.read();
+    if(success) {
+       displayTemporaryMessage("Pin code correct.", 3000);
+    }
+    else {
+       displayTemporaryMessage("Pin code incorrect. Attempts left: " + String(attemptsLeft), 3000);
+    }
+}
+
+void UNOComm::displayTemporaryMessage(const String &message, unsigned long duration) {
+    if(lcd) {
+        lcd->setCursor(0, 1);
+        lcd->print(message);
+        messageClearTime = millis() + duration;
+    }
+}
+
+void UNOComm::updateLCD() {
+    if(lcd) {
+        lcd->setCursor(0, 0);
+        lcd->print(getRtcData());
+
+        // Clear second line after message duration has passed
+        if (millis() >= messageClearTime && messageClearTime != 0) {
+            lcd->setCursor(0, 1);
+            lcd->print("                ");
+            messageClearTime = 0;
+        }
+    }
 }

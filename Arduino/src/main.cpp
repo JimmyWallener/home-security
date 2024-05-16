@@ -12,11 +12,12 @@ Components components(SOUND_SENSOR_PIN, PASSIVE_IR_SENSOR_PIN,
 void setup() {
     Serial.begin(115200);
     components.begin();
+    components.unoComm.setLCD(&components.lcd);
 }
 
 void loop() {
+    components.unoComm.updateLCD();
     SensorData data = components.getSensorData();
-    components.lcd.printMessage(components.unoComm.getRtcData());
 
     if (data.soundDetected || data.motionDetected) {
         components.buzzer.playAlarm();

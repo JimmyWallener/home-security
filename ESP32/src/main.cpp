@@ -12,6 +12,7 @@ ESP32Comm esp32Comm;
 WiFiConnection wifi;
 
 int lastMinute = -1; // Last minute that was sent to Arduino UNO
+int sendCounter = 0;
 
 void setup() {
     Serial.begin(115200);
@@ -32,7 +33,12 @@ void loop() {
         lastMinute = currentMinute;
         esp32Comm.sendRtcData(now);
     }
-    esp32Comm.sendAlarmStatusRequest();
+    // For testing if payload is sent and displayed on the LCD
+    if(sendCounter < 10){
+        esp32Comm.sendAlarmActivation();
+        sendCounter++;
+    }
+    
     
     delay(1000);
 }
