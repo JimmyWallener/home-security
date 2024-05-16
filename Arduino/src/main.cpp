@@ -1,7 +1,13 @@
 #include <Arduino.h>
 #include "Components.h"
+#include "Global.h"
 
-Components components(7, 8, 12, 11, 2, 3, 4, 5, 9, 205);
+
+
+Components components(SOUND_SENSOR_PIN, PASSIVE_IR_SENSOR_PIN, 
+                        LCD_RS_PIN, LCD_ENABLE_PIN, LCD_D4_PIN, 
+                        LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN, 
+                        BUZZER_PIN, BUZZER_DELAY_TIME);
 
 void setup() {
     Serial.begin(115200);
