@@ -1,14 +1,13 @@
 #include "Buzzer.h"
 
-// Constructor used for initialization
-Buzzer::Buzzer(uint8_t buzzerPin, uint16_t delayTime) : _buzzerPin(buzzerPin), _delayTime(delayTime){}
+Buzzer::Buzzer(uint8_t buzzerPin, uint16_t delayTime) : _buzzerPin(buzzerPin), _delayTime(delayTime) {}
 
-void Buzzer::initialize(){
+void Buzzer::begin() {
     pinMode(_buzzerPin, OUTPUT);
     noTone(_buzzerPin);
 }
 
-void Buzzer::playAlarm(){
+void Buzzer::playAlarm() {
     tone(_buzzerPin, 698); // F
     delay(_delayTime - 70);
     tone(_buzzerPin, 784); // G
@@ -17,7 +16,7 @@ void Buzzer::playAlarm(){
     delay(_delayTime - 70);
 }
 
-void Buzzer::alarmActiveSound(){
+void Buzzer::alarmActiveSound() {
     tone(_buzzerPin, 440);
     delay(_delayTime);
     tone(_buzzerPin, 466);
@@ -28,11 +27,9 @@ void Buzzer::alarmActiveSound(){
     delay(_delayTime);
     tone(_buzzerPin, 554);
     delay(_delayTime);
-
 }
 
-// Inverse of active to make user friendly 
-void Buzzer::alarmInactiveSound(){
+void Buzzer::alarmInactiveSound() {
     tone(_buzzerPin, 554);
     delay(_delayTime);
     tone(_buzzerPin, 523);
@@ -45,4 +42,6 @@ void Buzzer::alarmInactiveSound(){
     delay(_delayTime);
 }
 
-// Skriven av: Leo Katakalidis
+void Buzzer::alarmOff() {
+    digitalWrite(_buzzerPin, LOW);
+}

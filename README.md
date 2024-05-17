@@ -1,4 +1,5 @@
 Project Name: 
+main
 
 Home Security System with Arduino
 
@@ -42,7 +43,7 @@ Getting Started
     - Install Dependencies (Optional): If the project has specific library dependencies, run platformio lib install <library_name> within your project directory to install them.
     - Configure Azure IoT Hub (Optional): If you intend to use Azure IoT Hub, create an Azure account, set up an IoT Hub instance, and configure the connection details within the code.
     - Compile and Upload: Use the PlatformIO IDE (integrated into VS Code) to compile and upload the code to your Arduino and ESP32 boards.
-    
+main
 Additional Notes
 
     - This is a basic framework, and you may need to customize the code, libraries, and hardware connections based on your specific requirements and sensor choices.
@@ -53,11 +54,10 @@ Disclaimer
 
     - This project is for educational purposes only. The developers is not responsible for any misuse or malfunction of the system.
 
-
+main
 Contributors:
 
     - Leo Katakalidis
     - Joakim Sjöström
     - Jimmy Wallener
-
-
+main

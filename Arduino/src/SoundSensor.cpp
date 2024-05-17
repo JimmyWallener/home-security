@@ -1,21 +1,29 @@
-#include "../include/SoundSensor.h"
+#include "SoundSensor.h"
 #include <Arduino.h>
 
+SoundSensor::SoundSensor(uint8_t digitalPinNumber) : _digitalPinNumber(digitalPinNumber) {}
 
+void SoundSensor::begin() {
+    pinMode(_digitalPinNumber, INPUT);
+}
 
+bool SoundSensor::isSoundDetected() {
+    _digitalValue = digitalRead(_digitalPinNumber);
+    return _digitalValue == HIGH;
+}
+
+/*
 SoundSensor::SoundSensor(uint8_t ditigtalPinNumber){
     pinMode(ditigtalPinNumber, INPUT);
-    this->_ditigtalPinNumber = ditigtalPinNumber;
+    this->ditigtalPinNumber = ditigtalPinNumber;
 }
 
 void SoundSensor::activateSoundSensor(){
-        this->_digitalValue = digitalRead(_ditigtalPinNumber);
+        this->digitalValue = digitalRead(ditigtalPinNumber);
 
-        if(this->_digitalValue == HIGH){
+        if(this->digitalValue == HIGH){
             // insert alarm logic here for when alarm is active
         }else{
             // insert alarm logic here for when alarm is in-active
         }
-}
-
-// Skriven av: Leo Katakalidis
+}*/

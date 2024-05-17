@@ -1,26 +1,30 @@
 #include <Arduino.h>
-#include <SPI.h>
-#include "../include/Struct/SensorData.h"
-#include "../include/Struct/Components.h"
+#include "Components.h"
+#include "Global.h"
 
-SensorData sensorData;
-Components components;
 
-const int pirPin = -1;
-const int soundPin = -1;    
-const int buzzerPin = -1;
 
+Components components(SOUND_SENSOR_PIN, PASSIVE_IR_SENSOR_PIN, 
+                        LCD_RS_PIN, LCD_ENABLE_PIN, LCD_D4_PIN, 
+                        LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN, 
+                        BUZZER_PIN, BUZZER_DELAY_TIME);
 
 void setup() {
-    // put your setup code here, to run once:
-    Serial.begin(9600);
-    initializeSensorData(&sensorData, pirPin, soundPin);
-    initializeComponents(&components);
+    Serial.begin(115200);
+    components.begin();
 }
 
 void loop() {
-    updateSensorData(&sensorData);
-    components.rtc.RTCUpdate();
-    components.lcdDisplay.LCDUpdate(components.rtc.GetTime());
-    delay(1000);
+    SensorData data = components.getSensorData();
+    components.lcd.printMessage(components.unoComm.getRtcData());
+
+    if (data.soundDetected || data.motionDetected) {
+        components.buzzer.playAlarm();
+    } else {
+        components.buzzer.alarmOff();
+    }
+
+    Serial.println(data.toJson());
 }
+
+
