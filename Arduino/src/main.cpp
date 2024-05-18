@@ -26,6 +26,8 @@ void loop() {
     }
 
     Serial.println(data.toJson());
+  
+
 }
 
 

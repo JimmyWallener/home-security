@@ -17,12 +17,12 @@ public:
     void updateLCD();
 
 private:
-    DateTime _currentTime;
-    LCD *_lcd;
+    DateTime currentTime;
+    LCD *lcd;
     static void onReceiveWrapper(int numBytes);
-    static UNOComm *_instance; // Pointer to the current instance
+    static UNOComm *instance; // Pointer to the current instance
 
-    unsigned long _messageClearTime = 0;
+    unsigned long messageClearTime = 0;
 
     void handleRTCData();
     void handleTriggerEvent();

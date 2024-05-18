@@ -11,7 +11,7 @@ struct SensorLog {
     bool value;
 
     String toJson() const {
-        StaticJsonDocument<256> doc;
+        JsonDocument doc;
         doc["type"] = type;
         doc["timestamp"] = timestamp;
         doc["sensorType"] = sensorType;

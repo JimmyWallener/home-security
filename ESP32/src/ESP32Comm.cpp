@@ -1,14 +1,15 @@
 #include "ESP32Comm.h"
 #include "Global.h"
 
-ESP32Comm* ESP32Comm::_instance = nullptr;
+ESP32Comm* ESP32Comm::instance = nullptr;
 
 ESP32Comm::ESP32Comm() {
-    _instance = this;
+    this->instance = this;
 }
 
 void ESP32Comm::begin() {
-    Wire.begin(ESP32_I2C_ADDRESS);
+    Wire.begin();
+    Wire.onReceive(onReceiveWrapper);
 }
 
 void ESP32Comm::sendJsonData(const JsonDocument &doc) {
@@ -71,7 +72,7 @@ void ESP32Comm::onReceive(int numBytes) {
 }
 
 void ESP32Comm::onReceiveWrapper(int numBytes) {
-    if (_instance != nullptr) {
-        _instance->onReceive(numBytes);
+    if (instance != nullptr) {
+        instance->onReceive(numBytes);
     }
 }

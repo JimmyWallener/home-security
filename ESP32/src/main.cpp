@@ -16,14 +16,27 @@ int lastMinute = -1; // Last minute that was sent to Arduino UNO
 int sendCounter = 0;
 
 void setup() {
-    Serial.begin(115200);
-
-    // Initialize components
+     Serial.begin(115200);
+    Serial.println("Setup started.");
+    delay(5000);
     
-    
+    Serial.println("Initializing RealTimeClock");
     realTimeClock.begin();
+    Serial.println("RealTimeClock initialized");
+    delay(5000);
+
+    Serial.println("Initializing ESP32Comm");
     esp32Comm.begin();
+    Serial.println("ESP32Comm initialized");
+    delay(5000);
+
+    Serial.println("Connecting to WiFi...");
     wifi.connect(WIFI_SSID, WIFI_PASSWORD);
+    Serial.println("Connected to WiFi");
+    delay(5000);
+
+    Serial.println("Setup completed.");
+    delay(5000);
 }
 
 void loop() {
@@ -33,6 +46,7 @@ void loop() {
     if (currentMinute != lastMinute) {
         lastMinute = currentMinute;
         esp32Comm.sendRtcData(now);
+        Serial.println("Sent RTC data");
     }
     // For testing if payload is sent and displayed on the LCD
     if(sendCounter < 10){
@@ -45,3 +59,6 @@ void loop() {
 }
 
 
+
+
+ 

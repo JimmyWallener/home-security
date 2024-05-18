@@ -11,7 +11,7 @@ struct LoginLog {
     bool success;
 
     String toJson() const {
-        StaticJsonDocument<256> doc;
+        JsonDocument doc;
         doc["type"] = type;
         doc["timestamp"] = timestamp;
         doc["userId"] = userId;

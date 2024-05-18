@@ -11,7 +11,7 @@
 #define LCD_D7_PIN 5
 #define BUZZER_PIN 9
 #define BUZZER_DELAY_TIME 205
-const int ESP32_I2C_ADDRESS = 7;
-const int ARDUINO_I2C_ADDRESS = 8;
+#define ESP32_I2C_ADDRESS 7
+#define ARDUINO_I2C_ADDRESS 8
 
 #endif // GLOBAL_H

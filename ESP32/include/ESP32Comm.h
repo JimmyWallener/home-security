@@ -8,7 +8,7 @@
 class ESP32Comm {
 private:
     static void onReceiveWrapper(int numBytes);
-    static ESP32Comm *_instance;
+    static ESP32Comm *instance;
 
 public:
     ESP32Comm();

@@ -1,10 +1,10 @@
 #include "UNOComm.h"
 #include "Global.h"
 
-UNOComm* UNOComm::_instance = nullptr;
+UNOComm* UNOComm::instance = nullptr;
 
-UNOComm::UNOComm() : _lcd(nullptr){
-    _instance = this;
+UNOComm::UNOComm() : lcd(nullptr){
+    this->instance = this;
 }
 
 void UNOComm::begin() {
@@ -14,15 +14,15 @@ void UNOComm::begin() {
 }
 
 void UNOComm::setLCD(LCD *lcd) {
-    _lcd = lcd;
+    this->lcd = lcd;
 }
 
 void UNOComm::onReceiveWrapper(int numBytes) {
     Serial.print("onReceiveWrapper called with "); 
     Serial.print(numBytes); 
     Serial.println(" bytes."); // Debug output
-    if (_instance != nullptr) {
-        _instance->onReceive(numBytes);
+    if (instance != nullptr) {
+        instance->onReceive(numBytes);
     }
 }
 
@@ -63,7 +63,7 @@ void UNOComm::onReceive(int numBytes) {
 
 String UNOComm::getRtcData() {
     char buf1[] = "DD-MM-YYYY hh:mm:ss";
-    return String(_currentTime.toString(buf1));
+    return String(currentTime.toString(buf1));
 }
 
 void UNOComm::handleRTCData() {
@@ -74,7 +74,7 @@ void UNOComm::handleRTCData() {
     uint8_t hour = Wire.read();
     uint8_t minute = Wire.read();
     uint8_t second = Wire.read();
-    _currentTime = DateTime(year + 2000, month, day, hour, minute, second);
+    currentTime = DateTime(year + 2000, month, day, hour, minute, second);
     
 }
 
@@ -144,23 +144,24 @@ void UNOComm::handlePinCodeFeedback() {
 }
 
 void UNOComm::displayTemporaryMessage(const String &message, unsigned long duration) {
-    if(_lcd) {
-        _lcd->setCursor(0, 1);
-        _lcd->print(message);
-        _messageClearTime = millis() + duration;
+    if(lcd) {
+        lcd->setCursor(0, 1);
+        lcd->print(message);
+        messageClearTime = millis() + duration;
     }
 }
 
 void UNOComm::updateLCD() {
-    if(_lcd) {
-        _lcd->setCursor(0, 0);
-        _lcd->print(getRtcData());
+    if (lcd) {
+        
+        lcd->setCursor(0, 0);
+        lcd->print(getRtcData());
 
         // Clear second line after message duration has passed
-        if (millis() >= _messageClearTime && _messageClearTime != 0) {
-            _lcd->setCursor(0, 1);
-            _lcd->print("                ");
-            _messageClearTime = 0;
+        if (millis() >= messageClearTime && messageClearTime != 0) {
+            lcd->setCursor(0, 1);
+            lcd->print("                ");
+            messageClearTime = 0;
         }
     }
 }
