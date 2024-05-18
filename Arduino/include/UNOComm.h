@@ -5,6 +5,7 @@
 #include <RTClib.h>
 #include <SPI.h>
 #include "LCD.h"
+#include "SensorLog.h"
 
 class UNOComm {
 public:
@@ -16,12 +17,12 @@ public:
     void updateLCD();
 
 private:
-    DateTime currentTime;
-    LCD *lcd;
+    DateTime _currentTime;
+    LCD *_lcd;
     static void onReceiveWrapper(int numBytes);
-    static UNOComm* instance; // Pointer to the current instance
+    static UNOComm *_instance; // Pointer to the current instance
 
-    unsigned long messageClearTime = 0;
+    unsigned long _messageClearTime = 0;
 
     void handleRTCData();
     void handleTriggerEvent();
@@ -31,6 +32,9 @@ private:
     void handleAlarmStatusRequest();
     void handlePinCodeFeedback();
     void displayTemporaryMessage(const String &message, unsigned long duration);
+    void sendLogDataToESP32(const SensorLog &sensorLog);
+    void sendAlarmStatusToESP32(bool alarmActive);
+
 };
 
 #endif // UNOCOMM_H

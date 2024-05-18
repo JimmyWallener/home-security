@@ -1,22 +1,27 @@
 #include "ESP32Comm.h"
+#include "Global.h"
 
-ESP32Comm::ESP32Comm() {}
+ESP32Comm* ESP32Comm::_instance = nullptr;
+
+ESP32Comm::ESP32Comm() {
+    _instance = this;
+}
 
 void ESP32Comm::begin() {
-    Wire.begin();
+    Wire.begin(ESP32_I2C_ADDRESS);
 }
 
 void ESP32Comm::sendJsonData(const JsonDocument &doc) {
     String jsonString;
     serializeJson(doc, jsonString);
-    Wire.beginTransmission(8); // Assuming Arduino UNO is at address 8
+    Wire.beginTransmission(ARDUINO_I2C_ADDRESS); // Assuming Arduino UNO is at address 8
     Wire.write('J');
     Wire.write(jsonString.c_str());
     Wire.endTransmission();
 }
 
 void ESP32Comm::sendRtcData(const DateTime &now) {
-    Wire.beginTransmission(8);
+    Wire.beginTransmission(ARDUINO_I2C_ADDRESS);
     Wire.write('R');
     Wire.write(now.year() - 2000); // year
     Wire.write(now.month());       // month
@@ -28,26 +33,26 @@ void ESP32Comm::sendRtcData(const DateTime &now) {
 }
 
 void ESP32Comm::sendTriggerEvent(const char *sensor) {
-    Wire.beginTransmission(8);
+    Wire.beginTransmission(ARDUINO_I2C_ADDRESS);
     Wire.write('T');
     Wire.write(sensor);
     Wire.endTransmission();
 }
 
 void ESP32Comm::sendAlarmActivation() {
-    Wire.beginTransmission(8);
+    Wire.beginTransmission(ARDUINO_I2C_ADDRESS);
     Wire.write('A');
     Wire.endTransmission();
 }
 
 void ESP32Comm::sendAlarmDeactivation() {
-    Wire.beginTransmission(8);
+    Wire.beginTransmission(ARDUINO_I2C_ADDRESS);
     Wire.write('D');
     Wire.endTransmission();
 }
 
 void ESP32Comm::sendPinCodeFeedback(bool success, int attemptsLeft) {
-    Wire.beginTransmission(8);
+    Wire.beginTransmission(ARDUINO_I2C_ADDRESS);
     Wire.write('P');
     Wire.write(success);
     Wire.write(attemptsLeft);
@@ -55,7 +60,18 @@ void ESP32Comm::sendPinCodeFeedback(bool success, int attemptsLeft) {
 }
 
 void ESP32Comm::sendAlarmStatusRequest() {
-    Wire.beginTransmission(8);
+    Wire.beginTransmission(ARDUINO_I2C_ADDRESS);
     Wire.write('S');
     Wire.endTransmission();
+}
+
+void ESP32Comm::onReceive(int numBytes) {
+    // TODO: Implement onReceive method for Arduino UNO to ESP32 communication
+
+}
+
+void ESP32Comm::onReceiveWrapper(int numBytes) {
+    if (_instance != nullptr) {
+        _instance->onReceive(numBytes);
+    }
 }

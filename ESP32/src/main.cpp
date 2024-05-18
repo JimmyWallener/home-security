@@ -7,7 +7,8 @@
 #include <SPI.h>
 
 
-RealTimeClock rtc;
+
+RealTimeClock realTimeClock;
 ESP32Comm esp32Comm;
 WiFiConnection wifi;
 
@@ -20,14 +21,14 @@ void setup() {
     // Initialize components
     
     
-    rtc.begin();
+    realTimeClock.begin();
     esp32Comm.begin();
     wifi.connect(WIFI_SSID, WIFI_PASSWORD);
 }
 
 void loop() {
     // Get current time from RTC and send it to Arduino UNO every minute
-    DateTime now = rtc.getCurrentTime();
+    DateTime now = realTimeClock.getCurrentTime();
     int currentMinute = now.minute();
     if (currentMinute != lastMinute) {
         lastMinute = currentMinute;

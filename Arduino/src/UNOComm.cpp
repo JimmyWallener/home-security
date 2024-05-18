@@ -1,27 +1,28 @@
 #include "UNOComm.h"
+#include "Global.h"
 
-UNOComm* UNOComm::instance = nullptr;
+UNOComm* UNOComm::_instance = nullptr;
 
-UNOComm::UNOComm() : lcd(nullptr) {
-    instance = this;
+UNOComm::UNOComm() : _lcd(nullptr){
+    _instance = this;
 }
 
 void UNOComm::begin() {
-    Wire.begin(8); // Join I2C bus with address #8
+    Wire.begin(ARDUINO_I2C_ADDRESS); // Join I2C bus with address #8
     Wire.onReceive(onReceiveWrapper);
     Serial.println("UNOComm initialized and ready to receive data.");
 }
 
 void UNOComm::setLCD(LCD *lcd) {
-    this->lcd = lcd;
+    _lcd = lcd;
 }
 
 void UNOComm::onReceiveWrapper(int numBytes) {
     Serial.print("onReceiveWrapper called with "); 
     Serial.print(numBytes); 
     Serial.println(" bytes."); // Debug output
-    if (instance != nullptr) {
-        instance->onReceive(numBytes);
+    if (_instance != nullptr) {
+        _instance->onReceive(numBytes);
     }
 }
 
@@ -62,7 +63,7 @@ void UNOComm::onReceive(int numBytes) {
 
 String UNOComm::getRtcData() {
     char buf1[] = "DD-MM-YYYY hh:mm:ss";
-    return String(currentTime.toString(buf1));
+    return String(_currentTime.toString(buf1));
 }
 
 void UNOComm::handleRTCData() {
@@ -73,15 +74,18 @@ void UNOComm::handleRTCData() {
     uint8_t hour = Wire.read();
     uint8_t minute = Wire.read();
     uint8_t second = Wire.read();
-    currentTime = DateTime(year + 2000, month, day, hour, minute, second);
+    _currentTime = DateTime(year + 2000, month, day, hour, minute, second);
     
 }
 
  // Trigger Event if needed, method not complete
 void UNOComm::handleTriggerEvent() {
     // TODO: Implement trigger event handling if needed. Payload from ESP32 is a string: sensor name
-    char event[10];
-    Wire.readBytes(event, 10);
+    byte eventLength = Wire.read();
+    char event[eventLength + 1];
+    
+    Wire.readBytes(event, eventLength);
+    event[eventLength] = '\0';
     Serial.print("Trigger Event received: ");
     Serial.println(event);
 }
@@ -89,8 +93,10 @@ void UNOComm::handleTriggerEvent() {
 // Method not complete and not used
 void UNOComm::handleJsonData() {
     // TODO: Implement JSON data handling. Payload from ESP32 is a JSON string: {"key": "value"}
-    char json[100];
-    Wire.readBytes(json, 100);
+    byte jsonLength = Wire.read();
+    char json[jsonLength + 1];
+    Wire.readBytes(json, jsonLength);
+    json[jsonLength] = '\0';
     Serial.print("JSON Data received: ");
     Serial.println(json);
 }
@@ -138,23 +144,31 @@ void UNOComm::handlePinCodeFeedback() {
 }
 
 void UNOComm::displayTemporaryMessage(const String &message, unsigned long duration) {
-    if(lcd) {
-        lcd->setCursor(0, 1);
-        lcd->print(message);
-        messageClearTime = millis() + duration;
+    if(_lcd) {
+        _lcd->setCursor(0, 1);
+        _lcd->print(message);
+        _messageClearTime = millis() + duration;
     }
 }
 
 void UNOComm::updateLCD() {
-    if(lcd) {
-        lcd->setCursor(0, 0);
-        lcd->print(getRtcData());
+    if(_lcd) {
+        _lcd->setCursor(0, 0);
+        _lcd->print(getRtcData());
 
         // Clear second line after message duration has passed
-        if (millis() >= messageClearTime && messageClearTime != 0) {
-            lcd->setCursor(0, 1);
-            lcd->print("                ");
-            messageClearTime = 0;
+        if (millis() >= _messageClearTime && _messageClearTime != 0) {
+            _lcd->setCursor(0, 1);
+            _lcd->print("                ");
+            _messageClearTime = 0;
         }
     }
+}
+
+void UNOComm::sendLogDataToESP32(const SensorLog &sensorLog) {
+    String json = sensorLog.toJson();
+    Wire.beginTransmission(ESP32_I2C_ADDRESS);
+    Wire.write('L');
+    Wire.write(json.c_str());
+    Wire.endTransmission();
 }

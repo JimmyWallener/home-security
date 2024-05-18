@@ -7,7 +7,8 @@
 
 class ESP32Comm {
 private:
- 
+    static void onReceiveWrapper(int numBytes);
+    static ESP32Comm *_instance;
 
 public:
     ESP32Comm();
@@ -19,6 +20,9 @@ public:
     void sendAlarmDeactivation();
     void sendPinCodeFeedback(bool success, int attemptsLeft);
     void sendAlarmStatusRequest();
+    void onReceive(int numBytes);
+    
+
 };
 
 #endif // ESP32COMM_H
