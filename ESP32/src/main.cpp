@@ -54,7 +54,6 @@ void loop() {
         sendCounter++;
     }
     
-    
     delay(1000);
 }
 

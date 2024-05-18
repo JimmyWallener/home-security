@@ -2,6 +2,7 @@
 #define ESP32COMM_H
 
 #include <Wire.h>
+#include <WireSlave.h>
 #include <ArduinoJson.h>
 #include <RTClib.h>
 

@@ -3,6 +3,7 @@
 
 #include <ArduinoJson.h>
 
+// TODO: Refactor this struct to be more generic and handle different types of sensor data
 struct SensorData {
     bool motionDetected;
     bool soundDetected;

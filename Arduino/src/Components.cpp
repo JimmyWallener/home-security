@@ -12,6 +12,7 @@ void Components::begin() {
     pirSensor.activate(); // Activate PIR sensor
 }
 
+ // TODO: Needs to be refactored or removed. This is just a placeholder for testing purposes.
 SensorData Components::getSensorData() {
     SensorData data;
     data.motionDetected = pirSensor.isMotionDetected();
@@ -19,3 +20,5 @@ SensorData Components::getSensorData() {
     data.formattedTime = unoComm.getRtcData();
     return data;
 }
+
+// TODO: SensorLog.h

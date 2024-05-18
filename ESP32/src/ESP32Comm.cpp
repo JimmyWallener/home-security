@@ -8,10 +8,18 @@ ESP32Comm::ESP32Comm() {
 }
 
 void ESP32Comm::begin() {
+    // ESP32 I2C Master initialization
     Wire.begin();
+    
+    // ESP32 I2C Slave initialization
+    // TODO: Need to be tested on receieving data from Arduino UNO. NOT TESTED YET. But atleast it's not breaking the master -> slave communication
+    WireSlave.begin(21, 22, ESP32_I2C_ADDRESS); // Join I2C bus with address #8
+    
     Wire.onReceive(onReceiveWrapper);
+    
 }
 
+// This method is a just in case method, it can be removed if not needed
 void ESP32Comm::sendJsonData(const JsonDocument &doc) {
     String jsonString;
     serializeJson(doc, jsonString);
@@ -52,6 +60,7 @@ void ESP32Comm::sendAlarmDeactivation() {
     Wire.endTransmission();
 }
 
+// this method is simply for lcd-displaying purposes
 void ESP32Comm::sendPinCodeFeedback(bool success, int attemptsLeft) {
     Wire.beginTransmission(ARDUINO_I2C_ADDRESS);
     Wire.write('P');
@@ -60,6 +69,7 @@ void ESP32Comm::sendPinCodeFeedback(bool success, int attemptsLeft) {
     Wire.endTransmission();
 }
 
+// Had a thought about this method, but unsure now. It can be removed if not needed
 void ESP32Comm::sendAlarmStatusRequest() {
     Wire.beginTransmission(ARDUINO_I2C_ADDRESS);
     Wire.write('S');

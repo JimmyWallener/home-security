@@ -6,7 +6,7 @@
 struct LoginLog {
     String type = "login_log";
     String timestamp;
-    String userId;
+    String userId = "unknown";
     String action;
     bool success;
 
