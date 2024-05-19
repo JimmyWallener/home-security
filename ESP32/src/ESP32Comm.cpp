@@ -1,5 +1,5 @@
 #include "ESP32Comm.h"
-#include "Global.h"
+#include "global.h"
 
 ESP32Comm* ESP32Comm::instance = nullptr;
 

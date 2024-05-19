@@ -1,5 +1,5 @@
 #include "UNOComm.h"
-#include "Global.h"
+#include "global.h"
 
 UNOComm* UNOComm::instance = nullptr;
 
