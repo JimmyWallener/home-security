@@ -11,6 +11,7 @@
 class UNOComm : public Component {
 public:
     UNOComm();
+    ~UNOComm() override;
     void initialize() override;
     void setLCD(LCD*);
     static UNOComm *instance;

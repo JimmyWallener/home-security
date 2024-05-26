@@ -7,8 +7,17 @@ using namespace constants;
 UNOComm *UNOComm::instance = nullptr;
 
 // Set pointer to current instance
-UNOComm::UNOComm() : lcd(nullptr){
+UNOComm::UNOComm() : lcd(nullptr), sensorLog(nullptr){
     instance = this;
+}
+
+UNOComm::~UNOComm() {
+    if(lcd) {
+        delete lcd;
+    }
+    if (sensorLog) {
+        delete sensorLog;
+    }
 }
 
 void UNOComm::initialize() {

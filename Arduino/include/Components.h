@@ -6,6 +6,7 @@
 class Component {
     public:
         virtual void initialize() = 0;
+        virtual ~Component() = default;
 };
 
 class Components {

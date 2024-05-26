@@ -6,6 +6,8 @@ PIRSensor::PIRSensor(uint32_t pin) {
     _pin = pin;
 }
 
+PIRSensor::~PIRSensor() {}
+
 // Set the pin mode to input
 void PIRSensor::initialize() {
     pinMode(_pin, INPUT);

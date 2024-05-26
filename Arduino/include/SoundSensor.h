@@ -15,6 +15,7 @@ private:
 public:
     SoundSensor() : _digitalValue(0), _digitalPinNumber(0) {}
     SoundSensor(uint8_t digitalPinNumber);
+    ~SoundSensor() override;
     void initialize() override;
     bool isSoundDetected();
 };
