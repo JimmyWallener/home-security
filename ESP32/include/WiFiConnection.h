@@ -4,8 +4,14 @@
 #include <WiFi.h>
 
 class WiFiConnection {
+private:
+    const char* _ssid;
+    const char* _password;
+
 public:
-    void connect(const char* ssid, const char* password);
+    WiFiConnection(const char* ssid, const char* password) : _ssid(ssid), _password(password) {}
+    void connect();
+    bool isConnected();
 };
 
 #endif // WIFICONNECTION_H

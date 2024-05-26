@@ -2,7 +2,7 @@
 
 Buzzer::Buzzer(uint8_t buzzerPin, uint16_t delayTime) : _buzzerPin(buzzerPin), _delayTime(delayTime) {}
 
-void Buzzer::begin() {
+void Buzzer::initialize() {
     pinMode(_buzzerPin, OUTPUT);
     noTone(_buzzerPin);
 }

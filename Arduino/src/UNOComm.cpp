@@ -1,15 +1,20 @@
 #include "UNOComm.h"
-#include "global.h"
+#include "constants.h"
 
-UNOComm* UNOComm::instance = nullptr;
+using namespace constants;
 
+// Initiate static instance pointer
+UNOComm *UNOComm::instance = nullptr;
+
+// Set pointer to current instance
 UNOComm::UNOComm() : lcd(nullptr){
-    this->instance = this;
+    instance = this;
 }
 
-void UNOComm::begin() {
+void UNOComm::initialize() {
     Wire.begin(ARDUINO_I2C_ADDRESS); // Join I2C bus with address #8
-    Wire.onReceive(onReceiveWrapper);
+    Wire.onReceive(onReceive);
+    Wire.onRequest(sendLogDataToESP32);
     Serial.println("UNOComm initialized and ready to receive data.");
 }
 
@@ -17,65 +22,60 @@ void UNOComm::setLCD(LCD *lcd) {
     this->lcd = lcd;
 }
 
-void UNOComm::onReceiveWrapper(int numBytes) {
-    Serial.print("onReceiveWrapper called with "); 
-    Serial.print(numBytes); 
-    Serial.println(" bytes."); // Debug output
-    if (instance != nullptr) {
-        instance->onReceive(numBytes);
-    }
-}
 
 void UNOComm::onReceive(int numBytes) {
-   if (numBytes > 0) {
-       char command = Wire.read();
+    if(instance != nullptr)
+        instance->processI2CCommand(numBytes);
+}
 
-       switch (command) {
-              case 'R': // RTC Data
-                handleRTCData();
+void UNOComm::processI2CCommand(int numBytes){
+    if (numBytes > 0)
+        {
+            char command = Wire.read();
+
+            switch (command)
+            {
+            case 'R': // RTC Data
+                instance->setRealTimeClock();
                 break;
-              case 'T': // Trigger Event
-                handleTriggerEvent();
+            case 'T': // Trigger Event
+                instance->handleTriggerEvent();
                 break;
-              case 'J': // JSON Data
-                handleJsonData();
+            case 'J': // JSON Data
+                instance->handleJsonData();
                 break;
-              case 'A': // Alarm Activation
-                handleAlarmActivation();
+            case 'A': // Alarm Activation
+                instance->handleAlarmActivation();
                 break;
-              case 'D': // Alarm Deactivation
-                handleAlarmDeactivation();
+            case 'D': // Alarm Deactivation
+                instance->handleAlarmDeactivation();
                 break;
-              case 'S': // Alarm Status Request
-                handleAlarmStatusRequest();
+            case 'S': // Alarm Status Request
+                instance->handleAlarmStatusRequest();
                 break;
-              case 'P': // Pin Code Feedback
-                handlePinCodeFeedback();
+            case 'P': // Pin Code Feedback
+                instance->handlePinCodeFeedback();
                 break;
-              default:
+            default:
                 Serial.println("Invalid command received.");
                 break;
-         
-       }
-   }
+            }
+        }
 }
 
 
-String UNOComm::getRtcData() {
-    char buf1[] = "DD-MM-YYYY hh:mm:ss";
-    return String(currentTime.toString(buf1));
+String UNOComm::getRealTimeClock() {
+    return _dateTime;
 }
 
-void UNOComm::handleRTCData() {
-
-    uint8_t year = Wire.read();
-    uint8_t month = Wire.read();
-    uint8_t day = Wire.read();
-    uint8_t hour = Wire.read();
-    uint8_t minute = Wire.read();
-    uint8_t second = Wire.read();
-    currentTime = DateTime(year + 2000, month, day, hour, minute, second);
-    
+void UNOComm::setRealTimeClock() {
+    _dateTime = "";
+        while (Wire.available())
+        {
+            char c = Wire.read();
+            _dateTime += c;
+        }
+    updateLCD();
 }
 
  // Trigger Event if needed, method not complete
@@ -155,7 +155,7 @@ void UNOComm::updateLCD() {
     if (lcd) {
         
         lcd->setCursor(0, 0);
-        lcd->print(getRtcData());
+        lcd->print(getRealTimeClock());
 
         // Clear second line after message duration has passed
         if (millis() >= messageClearTime && messageClearTime != 0) {
@@ -166,10 +166,12 @@ void UNOComm::updateLCD() {
     }
 }
 
-void UNOComm::sendLogDataToESP32(const SensorLog &sensorLog) {
-    String json = sensorLog.toJson();
-    Wire.beginTransmission(ESP32_I2C_ADDRESS);
-    Wire.write('L');
-    Wire.write(json.c_str());
-    Wire.endTransmission();
+
+void UNOComm::sendLogDataToESP32() {
+
+    String sensorLog = "Testing";
+
+    for (char c : sensorLog) {
+        Wire.write(c);
+    }
 }

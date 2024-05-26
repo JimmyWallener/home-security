@@ -6,34 +6,33 @@
 #include <SPI.h>
 #include "LCD.h"
 #include "SensorLog.h"
+#include "Components.h"
 
-class UNOComm {
+class UNOComm : public Component {
 public:
     UNOComm();
-    void begin();
-    void setLCD(LCD *lcd);
-    void onReceive(int numBytes);
-    String getRtcData();
+    void initialize() override;
+    void setLCD(LCD*);
+    static UNOComm *instance;
+    String getRealTimeClock();
     void updateLCD();
 
 private:
-    DateTime currentTime;
+    String _dateTime;
     LCD *lcd;
-    static void onReceiveWrapper(int numBytes);
-    static UNOComm *instance; // Pointer to the current instance
-
+    SensorLog *sensorLog;
+    static void onReceive(int);
     unsigned long messageClearTime = 0;
-
-    void handleRTCData();
     void handleTriggerEvent();
+    void processI2CCommand(int);
+    void setRealTimeClock();
     void handleJsonData();
     void handleAlarmActivation();
     void handleAlarmDeactivation();
     void handleAlarmStatusRequest();
     void handlePinCodeFeedback();
-    void displayTemporaryMessage(const String &message, unsigned long duration);
-    void sendLogDataToESP32(const SensorLog &sensorLog);
-    void sendAlarmStatusToESP32(bool alarmActive);
+    void displayTemporaryMessage(const String&, unsigned long);
+    static void sendLogDataToESP32();
 
 };
 

@@ -7,7 +7,7 @@ PIRSensor::PIRSensor(uint32_t pin) {
 }
 
 // Set the pin mode to input
-void PIRSensor::begin() {
+void PIRSensor::initialize() {
     pinMode(_pin, INPUT);
     pirSensorInstance = this; // Set static instance to this object
 }

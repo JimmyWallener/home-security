@@ -3,7 +3,7 @@
 
 SoundSensor::SoundSensor(uint8_t digitalPinNumber) : _digitalPinNumber(digitalPinNumber) {}
 
-void SoundSensor::begin() {
+void SoundSensor::initialize() {
     pinMode(_digitalPinNumber, INPUT);
 }
 
