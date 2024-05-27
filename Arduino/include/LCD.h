@@ -11,8 +11,8 @@ public:
     LCD(uint8_t rs, uint8_t enable, uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7);
     ~LCD() override;
     void initialize() override;
-    void print(const String &message);
-    void setCursor(uint8_t col, uint8_t row);
+    void print(const String&);
+    void setCursor(uint8_t, uint8_t);
 };
 
 #endif // LCD_H

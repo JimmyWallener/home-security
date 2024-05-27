@@ -27,9 +27,7 @@ private:
     void handleTriggerEvent();
     void processI2CCommand(int);
     void setRealTimeClock();
-    void handleJsonData();
-    void handleAlarmActivation();
-    void handleAlarmDeactivation();
+    void handleAlarmActivation(char);
     void handleAlarmStatusRequest();
     void handlePinCodeFeedback();
     void displayTemporaryMessage(const String&, unsigned long);

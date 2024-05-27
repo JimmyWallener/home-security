@@ -12,8 +12,8 @@ class Component {
 class Components {
     public:
         Components();
-        void addComponent(Component *component);
-        void addComponent(Component *component[], int size);
+        void addComponent(Component*);
+        void addComponent(Component*[], int );
         void initializeAll();
 
     private:

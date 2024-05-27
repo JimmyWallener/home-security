@@ -11,7 +11,7 @@ private:
 
 public:
     Buzzer() : _buzzerPin(-1), _delayTime(205) {}
-    Buzzer(uint8_t buzzerPin, uint16_t delayTime);
+    Buzzer(uint8_t, uint16_t);
     ~Buzzer() override;
     void initialize() override;
     void playAlarm();

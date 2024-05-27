@@ -50,14 +50,11 @@ void UNOComm::processI2CCommand(int numBytes){
             case 'T': // Trigger Event
                 instance->handleTriggerEvent();
                 break;
-            case 'J': // JSON Data
-                instance->handleJsonData();
-                break;
             case 'A': // Alarm Activation
-                instance->handleAlarmActivation();
+                instance->handleAlarmActivation(command);
                 break;
             case 'D': // Alarm Deactivation
-                instance->handleAlarmDeactivation();
+                instance->handleAlarmActivation(command);
                 break;
             case 'S': // Alarm Status Request
                 instance->handleAlarmStatusRequest();
@@ -99,39 +96,16 @@ void UNOComm::handleTriggerEvent() {
     Serial.println(event);
 }
 
-// Method not complete and not used
-void UNOComm::handleJsonData() {
-    // TODO: Implement JSON data handling. Payload from ESP32 is a JSON string: {"key": "value"}
-    byte jsonLength = Wire.read();
-    char json[jsonLength + 1];
-    Wire.readBytes(json, jsonLength);
-    json[jsonLength] = '\0';
-    Serial.print("JSON Data received: ");
-    Serial.println(json);
+
+void UNOComm::handleAlarmActivation(char command) {
+    if(command == 'A') {
+        displayTemporaryMessage("Alarm is active", 5000);
+    } else {
+        displayTemporaryMessage("Alarm is offline", 5000);
+    }
 }
 
-void UNOComm::handleAlarmActivation() {
-    // TODO: Create a countdown displayed in the LCD, then activate the alarm. But commented out disrupts date and time display
-    // For now, just print a message
-    // create a 5 second count down displayed in lcd
-    /* displayTemporaryMessage("Alarm activated in 5 seconds.", 1000);
-    delay(1000);
-    displayTemporaryMessage("Alarm activated in 4 seconds.", 1000);
-    delay(1000);
-    displayTemporaryMessage("Alarm activated in 3 seconds.", 1000);
-    delay(1000);
-    displayTemporaryMessage("Alarm activated in 2 seconds.", 1000);
-    delay(1000);
-    displayTemporaryMessage("Alarm activated in 1 seconds.", 1000);
-    delay(1000); */
-    displayTemporaryMessage("Alarm activated!", 5000);
-}
 
-void UNOComm::handleAlarmDeactivation() {
-    // TODO: Implement alarm deactivation. 
-    // For now, just print a message
-    displayTemporaryMessage("Alarm deactivated.", 3000);
-}
 
 void UNOComm::handleAlarmStatusRequest() {
     // TODO: Implement alarm status request handling. Send alarm status to ESP32

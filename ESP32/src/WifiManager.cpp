@@ -1,10 +1,10 @@
-#include "WiFiConnection.h"
+#include "WifiManager.h"
 
 
 
 
 // Takes in the SSID and password of the WiFi network to connect to
-void WiFiConnection::connect() {
+void WifiManager::connect() {
     WiFi.begin(_ssid, _password);
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
@@ -13,6 +13,6 @@ void WiFiConnection::connect() {
     Serial.println("WiFi connected");
 }
 
-bool WiFiConnection::isConnected() {
+bool WifiManager::isConnected() {
     return WiFi.status() == WL_CONNECTED;
 }

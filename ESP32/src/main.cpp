@@ -1,54 +1,55 @@
 #include <Arduino.h>
-#include "Numpad.h"
 #include "RealTimeClock.h"
 #include "ESP32Comm.h"
-#include "WiFiConnection.h"
+#include "WifiManager.h"
 #include "secrets.h"
 #include <SPI.h>
 #include "constants.h"
+#include <Keypad.h>
 
 using namespace constants;
 
 RealTimeClock realTimeClock;
 ESP32Comm esp32Comm;
-WiFiConnection wifi(WIFI_SSID, WIFI_PASSWORD);
+WifiManager wifiManager(WIFI_SSID, WIFI_PASSWORD);
+
+Keypad keypad = Keypad(makeKeymap(KEYPAD_KEYS), KEYPAD_ROW_PINS, KEYPAD_COLS_PINS, KEYPAD_ROWS, KEYPAD_COLS);
 
 int lastMinute = -1; // Last minute that was sent to Arduino UNO
 int sendCounter = 0;
 
 void updateRealTimeClock();
-
-
+void handleKeypad();
 
 void setup() {
      Serial.begin(115200);
-    Serial.println("Setup started.");
+    Serial.println("################# Setup started #################");
     delay(5000);
     
-    Serial.println("Initializing RealTimeClock");
+    Serial.println("########### Initializing RealTimeClock ###########");
     realTimeClock.begin();
-    Serial.println("RealTimeClock initialized");
+    Serial.println("##### RealTimeClock successfully initialized #####");
     delay(5000);
 
-    Serial.println("Initializing ESP32Comm");
+    Serial.println("############# Initializing ESP32Comm #############");
     esp32Comm.begin();
-    Serial.println("ESP32Comm initialized");
+    Serial.println("####### ESP32Comm successfully initialized #######");
     delay(5000);
 
-    Serial.println("Connecting to WiFi...");
-    wifi.connect();
-    Serial.println("Connected to WiFi");
+    Serial.println("########## Establishing WIFI connection ##########");
+    wifiManager.connect();
+    Serial.println("############### Connected to WiFi ###############");
     delay(5000);
 
-    Serial.println("Setup completed.");
+    Serial.println("############### Setup is completed ###############");
     delay(5000);
+    keypad.setHoldTime(500);
 }
 
 void loop() {
 
     updateRealTimeClock();
-
-    delay(1000);
+    handleKeypad();
 }
 
 
@@ -61,10 +62,13 @@ void updateRealTimeClock() {
     if (currentMinute != lastMinute) {
         lastMinute = currentMinute;
         esp32Comm.sendRtcData(realTimeClock);
-        Serial.println("Sent RTC data");
+        Serial.println("############ Sent RTC data ####################");
     }
 }
 
-
-
- 
+void handleKeypad() {
+    
+    if(keypad.isPressed('#')) {
+        Serial.println("You pressed #");
+    }
+}

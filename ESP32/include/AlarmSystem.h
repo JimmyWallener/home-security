@@ -15,7 +15,7 @@ class AlarmSystem {
     public:
     bool getState(); 
     bool checkPassword();
-    void getPassword(Keypad &numpad);
+    void getPassword(Keypad&);
     void changeAlarmState();
     // void playAlarm(Buzzer &Buzzer); // this needs to send a message to Arduino to play buzzer instead of doing it itself
     void awaitSensorData();

@@ -10,16 +10,15 @@
 
 class ESP32Comm {
 private:
-    bool isActive{false};
 
 public:
     ESP32Comm();
     void begin();
-    void sendJsonData(const JsonDocument &doc);
-    void sendRtcData(RealTimeClock &now);
-    void sendTriggerEvent(const char *sensor);
-    void sendAlarmActivationChange();
-    void sendPinCodeFeedback(bool success, int attemptsLeft);
+    void sendJsonData(const JsonDocument&);
+    void sendRtcData(RealTimeClock&);
+    void sendTriggerEvent(const char*);
+    void sendAlarmActivationChange(bool);
+    void sendPinCodeFeedback(bool, int );
     static JsonDocument requestDataFromPeripheral();
 };
 
