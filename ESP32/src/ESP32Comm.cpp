@@ -10,11 +10,11 @@ void ESP32Comm::begin() {
   Wire.begin();
 }
 
-void ESP32Comm::sendRtcData(RealTimeClock &now) {
+void ESP32Comm::sendRtcData(RealTimeClock &realTimeClock) {
   Serial.println("RealTimeClock transmission started");
   Wire.beginTransmission(ARDUINO_I2C_ADDRESS);
   Wire.write('R');
-  Wire.write(now.getFormattedTime().c_str());
+  Wire.write(realTimeClock.getFormattedTime().c_str());
   byte status = Wire.endTransmission();
 
   if (status == 0) {
@@ -43,6 +43,13 @@ void ESP32Comm::sendPinCodeFeedback(bool success, int attemptsLeft) {
   Wire.write('P');
   Wire.write((success ? 1 : 0));
   Wire.write(attemptsLeft);
+  Wire.endTransmission();
+}
+
+void ESP32Comm::sendKeypadData(char key) {
+  Wire.beginTransmission(ARDUINO_I2C_ADDRESS);
+  Wire.write('K');
+  Wire.write(key);
   Wire.endTransmission();
 }
 

@@ -19,6 +19,7 @@ public:
     void sendTriggerEvent(const char*);
     void sendAlarmActivationChange(bool);
     void sendPinCodeFeedback(bool, int );
+    void sendKeypadData(char);
     static JsonDocument requestDataFromPeripheral();
 };
 

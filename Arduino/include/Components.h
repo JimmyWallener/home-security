@@ -17,7 +17,7 @@ class Components {
         void initializeAll();
 
     private:
-        static const int MAX_COMPONENTS = 10;
+        static const int MAX_COMPONENTS{10};
         Component *components[MAX_COMPONENTS];
         int componentCount;
 };

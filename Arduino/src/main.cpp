@@ -17,12 +17,23 @@ Buzzer *buzzer = new Buzzer(BUZZER_PIN, BUZZER_DELAY_TIME);
 PIRSensor *pirSensor = new PIRSensor(PASSIVE_IR_SENSOR_PIN);
 UNOComm *unoComm = new UNOComm;
 
+extern int __heap_start, *__brkval;
 
+int freeMemory() {
+    int v;
+    return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+}
 
 void setup() {
     Serial.begin(115200);
+
+    Serial.println("Free memory: ");
+    Serial.println(freeMemory());
+
     Component *componentArray[] = {soundSensor, lcd, buzzer, pirSensor, unoComm};
     int numberOfComponents = sizeof(componentArray) / sizeof(componentArray[0]);
+    Serial.print("Number of components to add: ");
+    Serial.println(numberOfComponents);
 
     components.addComponent(componentArray, numberOfComponents);
     Serial.println("Components added");
@@ -30,11 +41,13 @@ void setup() {
     components.initializeAll();
     delay(1000);
     unoComm->setLCD(lcd);
+    unoComm->setBuzzer(buzzer);
     Serial.println("Components initialized");
     delay(1000);
 }
 
 void loop() {
+    delay(10);
+    buzzer->update();
+    unoComm->update();
 }
-
-

@@ -7,7 +7,7 @@ using namespace constants;
 UNOComm *UNOComm::instance = nullptr;
 
 // Set pointer to current instance
-UNOComm::UNOComm() : lcd(nullptr), sensorLog(nullptr){
+UNOComm::UNOComm() : lcd(nullptr), sensorLog(nullptr), buzzer(nullptr){
     instance = this;
 }
 
@@ -17,6 +17,9 @@ UNOComm::~UNOComm() {
     }
     if (sensorLog) {
         delete sensorLog;
+    }
+    if (buzzer) {
+        delete buzzer;
     }
 }
 
@@ -62,6 +65,9 @@ void UNOComm::processI2CCommand(int numBytes){
             case 'P': // Pin Code Feedback
                 instance->handlePinCodeFeedback();
                 break;
+            case 'K': // Keypad Data
+                instance->handleKeypadData();
+                break;
             default:
                 Serial.println("Invalid command received.");
                 break;
@@ -94,6 +100,36 @@ void UNOComm::handleTriggerEvent() {
     event[eventLength] = '\0';
     Serial.print("Trigger Event received: ");
     Serial.println(event);
+}
+
+void UNOComm::handleKeypadData() {
+    buzzer->keyPressSound();
+    char key = Wire.read();
+
+    if (key == 'D' && _pinCode.length() > 0) {
+        Serial.println("Delete key pressed");
+        _pinCode.remove(_pinCode.length() - 1, 1);
+        Serial.println(_pinCode);
+    } else if (key != 'D' && _pinCode.length() < 4) {
+        _pinCode += '*';
+        Serial.println(_pinCode);
+    }
+
+    // Update the display immediately
+    if (lcd) {
+        lcd->setCursor(0, 1);
+        lcd->print("                ");  // Clear the line
+        lcd->setCursor(0, 1);
+        lcd->print(_pinCode);
+    }
+
+    // Clear _pinCode after 4 digits and displayMessage timer has passed
+    if (_pinCode.length() == 4 && millis() >= messageClearTime) {
+        _pinCode.remove(0, 4);
+    }
+
+    // Update the message clear time
+    messageClearTime = millis() + 1000;  // Set the duration for the message to be displayed
 }
 
 
@@ -131,6 +167,7 @@ void UNOComm::displayTemporaryMessage(const String &message, unsigned long durat
         lcd->setCursor(0, 1);
         lcd->print(message);
         messageClearTime = millis() + duration;
+        updateLCD();
     }
 }
 
@@ -149,6 +186,13 @@ void UNOComm::updateLCD() {
     }
 }
 
+void UNOComm::update() {
+    if (millis() - _lastLCDUpdateTime >= lcdUpdateInterval) {
+        _lastLCDUpdateTime = millis();
+        updateLCD();
+    }
+}
+
 
 void UNOComm::sendLogDataToESP32() {
 
@@ -157,4 +201,12 @@ void UNOComm::sendLogDataToESP32() {
     for (char c : sensorLog) {
         Wire.write(c);
     }
+}
+
+void UNOComm::setSensorLog(SensorLog *sensorLog) {
+    this->sensorLog = sensorLog;
+}
+
+void UNOComm::setBuzzer(Buzzer *buzzer) {
+    this->buzzer = buzzer;
 }

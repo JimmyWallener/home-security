@@ -13,10 +13,11 @@ RealTimeClock realTimeClock;
 ESP32Comm esp32Comm;
 WifiManager wifiManager(WIFI_SSID, WIFI_PASSWORD);
 
-Keypad keypad = Keypad(makeKeymap(KEYPAD_KEYS), KEYPAD_ROW_PINS, KEYPAD_COLS_PINS, KEYPAD_ROWS, KEYPAD_COLS);
+Keypad keypad{Keypad(makeKeymap(KEYPAD_KEYS), KEYPAD_ROW_PINS, KEYPAD_COLS_PINS, KEYPAD_ROWS, KEYPAD_COLS)};
 
-int lastMinute = -1; // Last minute that was sent to Arduino UNO
-int sendCounter = 0;
+
+int lastMinute{-1}; // Last minute that was sent to Arduino UNO
+int sendCounter{0};
 
 void updateRealTimeClock();
 void handleKeypad();
@@ -57,6 +58,7 @@ void loop() {
 
 void updateRealTimeClock() {
     // Get current time from RTC and send it to Arduino UNO every minute
+    
     DateTime now = realTimeClock.getCurrentTime();
     int currentMinute = now.minute();
     if (currentMinute != lastMinute) {
@@ -68,7 +70,9 @@ void updateRealTimeClock() {
 
 void handleKeypad() {
     
-    if(keypad.isPressed('#')) {
-        Serial.println("You pressed #");
+    char key = keypad.getKey();
+    if (key) {
+        Serial.println(key);
+        esp32Comm.sendKeypadData(key);
     }
 }
