@@ -15,7 +15,6 @@ WifiManager wifiManager(WIFI_SSID, WIFI_PASSWORD);
 
 Keypad keypad{Keypad(makeKeymap(KEYPAD_KEYS), KEYPAD_ROW_PINS, KEYPAD_COLS_PINS, KEYPAD_ROWS, KEYPAD_COLS)};
 
-
 int lastMinute{-1}; // Last minute that was sent to Arduino UNO
 int sendCounter{0};
 
@@ -23,7 +22,7 @@ void updateRealTimeClock();
 void handleKeypad();
 
 void setup() {
-     Serial.begin(115200);
+    Serial.begin(115200);
     Serial.println("################# Setup started #################");
     delay(5000);
     
@@ -37,10 +36,10 @@ void setup() {
     Serial.println("####### ESP32Comm successfully initialized #######");
     delay(5000);
 
-    Serial.println("########## Establishing WIFI connection ##########");
+    /* Serial.println("########## Establishing WIFI connection ##########");
     wifiManager.connect();
     Serial.println("############### Connected to WiFi ###############");
-    delay(5000);
+    delay(5000); */
 
     Serial.println("############### Setup is completed ###############");
     delay(5000);
@@ -52,9 +51,6 @@ void loop() {
     updateRealTimeClock();
     handleKeypad();
 }
-
-
-
 
 void updateRealTimeClock() {
     // Get current time from RTC and send it to Arduino UNO every minute

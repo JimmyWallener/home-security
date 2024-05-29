@@ -16,6 +16,7 @@ public:
     void keyPressSound();
     void alarmOff();
     void update();
+    void wrongPassword();
 
 private:
     void playTones(const int* tones, int tonesLength);

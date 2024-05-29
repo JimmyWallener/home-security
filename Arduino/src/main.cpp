@@ -46,8 +46,45 @@ void setup() {
     delay(1000);
 }
 
+bool playingAlarm = true;
+int alarmCount = 0;
+int timeCounter = 0; 
+
 void loop() {
     delay(10);
-    buzzer->update();
-    unoComm->update();
+    
+    if(unoComm->getState()) {
+        buzzer->update();
+        unoComm->update();
+
+        if(pirSensor->isMotionDetected()) {
+            alarmCount++;
+        }
+
+        if(soundSensor->isSoundDetected()) {
+            alarmCount++;
+        }
+
+        if(alarmCount >= 3) {
+            alarmCount = 0;
+            while(playingAlarm) {
+                buzzer->playAlarm();
+                buzzer->update();
+                unoComm->update();
+                if(!unoComm->getState()) {
+                    playingAlarm = false;
+                }
+            }
+        }
+        timeCounter++;
+        if(timeCounter > 500) {
+            timeCounter = 0;
+            alarmCount = 0;
+        }
+        playingAlarm = true;
+    
+    } else {
+        buzzer->update();
+        unoComm->update();
+    }
 }

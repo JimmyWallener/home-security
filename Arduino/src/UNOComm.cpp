@@ -109,9 +109,11 @@ void UNOComm::handleKeypadData() {
     if (key == 'D' && _pinCode.length() > 0) {
         Serial.println("Delete key pressed");
         _pinCode.remove(_pinCode.length() - 1, 1);
+        _userInputtedPassword.remove(_userInputtedPassword.length() - 1, 1);
         Serial.println(_pinCode);
     } else if (key != 'D' && _pinCode.length() < 4) {
         _pinCode += '*';
+        this->_userInputtedPassword += key;
         Serial.println(_pinCode);
     }
 
@@ -123,15 +125,27 @@ void UNOComm::handleKeypadData() {
         lcd->print(_pinCode);
     }
 
+    if(_userInputtedPassword.length() == 4) {
+        if(checkPassword()) {
+            lcd->setCursor(0, 1);
+            switchState();
+            _userInputtedPassword.remove(0, 4);
+        } else {
+            lcd->setCursor(0, 1);
+            lcd->print("Wrong Password");
+            buzzer->wrongPassword();
+        }
+    }
+
     // Clear _pinCode after 4 digits and displayMessage timer has passed
     if (_pinCode.length() == 4 && millis() >= messageClearTime) {
         _pinCode.remove(0, 4);
+        _userInputtedPassword.remove(0, 4);
     }
-
+    
     // Update the message clear time
     messageClearTime = millis() + 1000;  // Set the duration for the message to be displayed
 }
-
 
 void UNOComm::handleAlarmActivation(char command) {
     if(command == 'A') {
@@ -140,8 +154,6 @@ void UNOComm::handleAlarmActivation(char command) {
         displayTemporaryMessage("Alarm is offline", 5000);
     }
 }
-
-
 
 void UNOComm::handleAlarmStatusRequest() {
     // TODO: Implement alarm status request handling. Send alarm status to ESP32
@@ -209,4 +221,39 @@ void UNOComm::setSensorLog(SensorLog *sensorLog) {
 
 void UNOComm::setBuzzer(Buzzer *buzzer) {
     this->buzzer = buzzer;
+}
+
+bool UNOComm::checkPassword() {
+    for(int i = 0; i < 4; i++) {
+        if(_userInputtedPassword[i] != _password[i]) {
+            return false; 
+        }
+    }
+    return true;
+}
+
+void UNOComm::switchState() {
+    switch (this->_state)
+            {
+            case 0:
+                this->_state = 1;
+                lcd->print("Alarm Activated");
+                break;
+
+            case 1:
+                this->_state = 0;
+                lcd->print("Deactivated");
+                break;
+
+            default:
+                break;
+            }
+}
+
+bool UNOComm::getState() {
+    if(this->_state == 1) {
+        return true;
+    } else {
+        return false;
+    }
 }
