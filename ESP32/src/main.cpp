@@ -59,7 +59,7 @@ void loop() {
     updateRealTimeClock();
     handleKeypad();
     while(sendCounter < 2){
-        bool isValid = http.isPinCodeValid("1232131");
+        bool isValid = http.isPinCodeValid("1234");
         if(isValid) {
             Serial.println("Pin code is valid");
     } else {
