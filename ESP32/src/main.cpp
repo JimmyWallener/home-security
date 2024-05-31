@@ -6,12 +6,14 @@
 #include <SPI.h>
 #include "constants.h"
 #include <Keypad.h>
+#include <Http.h>
 
 using namespace constants;
 
 RealTimeClock realTimeClock;
 ESP32Comm esp32Comm;
 WifiManager wifiManager(WIFI_SSID, WIFI_PASSWORD);
+Http http(&wifiManager);
 
 Keypad keypad{Keypad(makeKeymap(KEYPAD_KEYS), KEYPAD_ROW_PINS, KEYPAD_COLS_PINS, KEYPAD_ROWS, KEYPAD_COLS)};
 
@@ -42,6 +44,11 @@ void setup() {
     Serial.println("############### Connected to WiFi ###############");
     delay(5000);
 
+    Serial.println("############### Syncing time with NTP ###############");
+    http.syncTime();
+    Serial.println("############### Time is synced ###############");
+    delay(5000);
+
     Serial.println("############### Setup is completed ###############");
     delay(5000);
     keypad.setHoldTime(500);
@@ -51,6 +58,17 @@ void loop() {
 
     updateRealTimeClock();
     handleKeypad();
+    while(sendCounter < 2){
+        bool isValid = http.isPinCodeValid("1232131");
+        if(isValid) {
+            Serial.println("Pin code is valid");
+    } else {
+        Serial.println("Pin code is not valid");
+    }
+        sendCounter++;
+        delay(1000);
+    }
+   
 }
 
 

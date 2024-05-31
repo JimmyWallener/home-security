@@ -1,4 +1,4 @@
-#include "../include/AlarmSystem.h"
+#include "AlarmSystem.h"
 
 bool AlarmSystem::checkPassword() {
     
