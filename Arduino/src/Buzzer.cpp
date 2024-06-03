@@ -14,7 +14,10 @@ void Buzzer::initialize() {
 
 void Buzzer::playAlarm() {
     static const int tones[] = {698, 784, 831};
-    playTones(tones, sizeof(tones) / sizeof(tones[0]));
+    for(int i = 0; i < 3; i++) {
+        tone(_buzzerPin, tones[i]);
+        delay(40);
+    } 
 }
 
 void Buzzer::alarmActiveSound() {
@@ -24,6 +27,11 @@ void Buzzer::alarmActiveSound() {
 
 void Buzzer::alarmInactiveSound() {
     static const int tones[] = {554, 523, 494, 466, 440};
+    playTones(tones, sizeof(tones) / sizeof(tones[0]));
+}
+
+void Buzzer::wrongPassword() {
+    static const int tones[] = {554, 440};
     playTones(tones, sizeof(tones) / sizeof(tones[0]));
 }
 
