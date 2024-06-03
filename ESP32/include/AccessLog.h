@@ -1,12 +1,12 @@
-#ifndef LOGINLOG_H
-#define LOGINLOG_H
+#ifndef ACCESSLOG_H
+#define ACCESSLOG_H
 
 #include <ArduinoJson.h>
 
-struct LoginLog {
+struct AccessLog {
     String type = "login_log";
     String timestamp;
-    String userId = "unknown";
+    String userId = "Unknown";
     String action;
     bool success;
 
@@ -23,4 +23,4 @@ struct LoginLog {
     }
 };
 
-#endif // LOGINLOG_H
+#endif // ACCESSLOG_H

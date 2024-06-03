@@ -1,17 +1,28 @@
-#include "Http.h"
+#include "HttpsRequest.h"
 #include "secrets.h"
 #include <mbedtls/base64.h>
 #include <string.h>
 #include <time.h>
+#include "AccessLog.h"
 
-Http::Http(WifiManager* wifiManager) : wifiManager(wifiManager) {
-    this->wifiManager = wifiManager;
-    
+
+
+
+HttpsRequest::HttpsRequest(WifiManager* wifiManager) : _wifiManager(wifiManager){
+    this->_mqtt = new MQTT(wifiManager);
 }
 
+/**
+ * @brief Synchronize the time with the NTP server. The time is used to generate the authorization token
+ *  for Azure Cosmos DB. Becasue the token is valid for a short period of time, the time must be in sync.
+ *  
+ */
 
-void Http::syncTime() {
-    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+void HttpsRequest::syncTime() {
+    const long gmtOffset_sec = 3600 * 2;
+    const int daylightOffset_sec = 0; 
+
+    configTime(gmtOffset_sec, daylightOffset_sec, "europe.pool.ntp.org", "se.pool.ntp.org");
     Serial.println("Waiting for NTP time sync: ");
     time_t now = time(nullptr);
     while (now < 8 * 3600 * 2) {
@@ -21,12 +32,24 @@ void Http::syncTime() {
     }
     Serial.println("");
     struct tm timeinfo;
-    gmtime_r(&now, &timeinfo);
+    localtime_r(&now, &timeinfo);
     Serial.println("Current time: ");
     Serial.println(asctime(&timeinfo));
 }
 
-String Http::generateAuthToken(const String& verb, const String& resourceType, const String& resourceLink, const String& date) {
+/**
+ * @brief Generate the authorization token for Azure Cosmos DB. Depending on the verb, resource type,
+ *  resource link and date, the token is generated. The token is then encoded in base64 and signed using
+ * the primary key of the Azure Cosmos DB account.
+ * 
+ * @param verb 
+ * @param resourceType 
+ * @param resourceLink 
+ * @param date 
+ * @return ** String 
+ */
+
+String HttpsRequest::generateAuthToken(const String& verb, const String& resourceType, const String& resourceLink, const String& date) {
 
     String tempVerb = verb;
     String tempResourceType = resourceType;
@@ -75,32 +98,21 @@ String Http::generateAuthToken(const String& verb, const String& resourceType, c
 }
 
 
-bool Http::isPinCodeValid(String pinCode) {
+/**
+ * @brief Check if the pin code is valid. The pin code is checked against the Azure Cosmos DB.
+ * 
+ * @param pinCode 
+ * @return ** bool 
+ */
 
-    const char *rootCA = R"(-----BEGIN CERTIFICATE-----
-MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBh
-MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
-d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBH
-MjAeFw0xMzA4MDExMjAwMDBaFw0zODAxMTUxMjAwMDBaMGExCzAJBgNVBAYTAlVT
-MRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j
-b20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IEcyMIIBIjANBgkqhkiG
-9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuzfNNNx7a8myaJCtSnX/RrohCgiN9RlUyfuI
-2/Ou8jqJkTx65qsGGmvPrC3oXgkkRLpimn7Wo6h+4FR1IAWsULecYxpsMNzaHxmx
-1x7e/dfgy5SDN67sH0NO3Xss0r0upS/kqbitOtSZpLYl6ZtrAGCSYP9PIUkY92eQ
-q2EGnI/yuum06ZIya7XzV+hdG82MHauVBJVJ8zUtluNJbd134/tJS7SsVQepj5Wz
-tCO7TG1F8PapspUwtP1MVYwnSlcUfIKdzXOS0xZKBgyMUNGPHgm+F6HmIcr9g+UQ
-vIOlCsRnKPZzFBQ9RnbDhxSJITRNrw9FDKZJobq7nMWxM4MphQIDAQABo0IwQDAP
-BgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIBhjAdBgNVHQ4EFgQUTiJUIBiV
-5uNu5g/6+rkS7QYXjzkwDQYJKoZIhvcNAQELBQADggEBAGBnKJRvDkhj6zHd6mcY
-1Yl9PMWLSn/pvtsrF9+wX3N3KjITOYFnQoQj8kVnNeyIv/iPsGEMNKSuIEyExtv4
-NeF22d+mQrvHRAiGfzZ0JFrabA0UWTW98kndth/Jsw1HKj2ZL7tcu7XUIOGZX1NG
-Fdtom/DzMNU+MeKNhJ7jitralj41E6Vf8PlwUHBHQRFXGU7Aj64GxJUTFy8bJZ91
-8rGOmaFvE7FBcf6IKshPECBV1/MUReXgRPTqh5Uykw7+U0b6LJ3/iyK5S9kJRaTe
-pLiaWN0bfVKfjllDiIGknibVb63dDcY3fe0Dkhvld1927jyNxF1WW6LZZm6zNTfl
-MrY=
------END CERTIFICATE-----)";
+bool HttpsRequest::isPinCodeValid(String pinCode) {
 
-    if (!wifiManager->isConnected()) {
+        
+
+    // Root CA certificate for Azure Cosmos DB, obtained from https://www.digicert.com/kb/digicert-root-certificates.htm
+    const char *rootCA = ROOT_CA;
+
+    if (!_wifiManager->isConnected()) {
         Serial.println("WiFi is not connected");
         return false;
     }
@@ -117,18 +129,19 @@ MrY=
     WiFiClientSecure client;
     client.setCACert(rootCA);
     HTTPClient https;
-   
+
     String url = AZURE_COSMO_DB_URI + "dbs/" + AZURE_COSMO_DB_NAME + "/colls/" + AZURE_COSMO_DB_USER_CONTAINER + "/docs";
     String resourceLink = "dbs/" + AZURE_COSMO_DB_NAME + "/colls/" + AZURE_COSMO_DB_USER_CONTAINER;
     String authorizationToken = generateAuthToken("POST", "docs", resourceLink, date);
 
     https.begin(client, url);
-
+     // Set headers for the HTTPS request
     https.addHeader("Content-Type", "application/query+json");
     https.addHeader("x-ms-documentdb-isquery", "true");
     https.addHeader("x-ms-documentdb-query-enablecrosspartition", "true");
     https.addHeader("x-ms-documentdb-query-rawresponse", "true");
     https.addHeader("Authorization", authorizationToken);
+    // Important that the date in the header matches the date used to generate the authorization token
     https.addHeader("x-ms-date", date);
     https.addHeader("x-ms-version", "2018-12-31");
     https.addHeader("x-ms-documentdb-partitionkey", "");
@@ -136,7 +149,9 @@ MrY=
    // String query = "{\"query\": \"SELECT * FROM " + AZURE_COSMO_DB_USER_CONTAINER + " c WHERE c.pinCode = @pinCode\", \"parameters\": [{\"name\": \"@pinCode\", \"value\": \"" + pinCode + "\"}]}";
 
     JsonDocument doc;
-    doc["query"] = "SELECT * FROM " + AZURE_COSMO_DB_USER_CONTAINER + " c WHERE c.pinCode = @pinCode"; // Simplified query
+
+    // Simplified query that only checks if the pin code exists in the Azure Cosmos DB
+    doc["query"] = "SELECT * FROM " + AZURE_COSMO_DB_USER_CONTAINER + " c WHERE c.pinCode = @pinCode"; 
     JsonArray params = doc["parameters"].to<JsonArray>();
     JsonObject param1 = params.add<JsonObject>();
     param1["name"] = "@pinCode";
@@ -147,9 +162,11 @@ MrY=
 
     int httpResponseCode = https.POST(requestBody);
 
+    Serial.println(https.getString());
+
     if (httpResponseCode > 0) {
         String response = https.getString();
-        Serial.println("Response: " + response);
+        Serial.println(response);
 
         JsonDocument responseDoc;
         deserializeJson(responseDoc, response);
@@ -159,22 +176,46 @@ MrY=
 
             String pinCode = doc["pinCode"].as<String>();
             if (pinCode == pinCode) {
-                Serial.println("Pin code is valid");
+
+               sendAccessLog(doc["userId"].as<String>(), date, "loginattempt", true);
+
+                // if the pin code is found in the Azure Cosmos DB, return true and end the HTTPS request
                 https.end();
                 return true;
             }
         }
-      
+
+        sendAccessLog("Unknown", date, "loginattempt", false);
+        // if the pin code is not found in the Azure Cosmos DB, return false and end the HTTPS request
         https.end();
 
         return false;
     }
-    else
-    {
+    else {
+        // if the HTTPS request fails, print the error code and end the HTTPS request
         Serial.println("Error on HTTPS request");
         Serial.println(httpResponseCode);
+        https.end();
     }
+
+    // if the HTTPS request fails, return false
     Serial.println("Request failed");
     https.end();
     return false; 
 }
+
+
+void HttpsRequest::sendAccessLog(const String userId, const String timestamp, const String action, bool success) {
+
+    if(_mqtt == nullptr) {
+        _mqtt->connect();
+    }
+
+    AccessLog log;
+    log.userId = userId;
+    log.timestamp = timestamp;
+    log.action = action;
+    log.success = success;
+
+    _mqtt->sendTelemetry(log.toJson());
+} 

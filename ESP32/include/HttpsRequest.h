@@ -1,24 +1,28 @@
-#ifndef HTTP_H
-#define HTTP_H
+#ifndef HTTPSREQUEST_H
+#define HTTPSREQUEST_H
 
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <WiFiClientSecure.h>
 #include "WifiManager.h"
 #include <Arduino.h>
+#include "MQTT.h"
 
 
-class Http {
+class HttpsRequest {
     public:
-        Http(WifiManager*);
+        HttpsRequest(WifiManager*);
         bool isPinCodeValid(String);
         void syncTime();
 
     private:
-        WifiManager* wifiManager;
+        WifiManager* _wifiManager{nullptr};
+        MQTT* _mqtt{nullptr};
         
         String generateAuthToken(const String&, const String&, const String&, const String&);
+        void sendAccessLog(const String, const String, const String, const bool);
 };
 
 
-#endif //HTTP_H
+#endif //HTTPSREQUEST_H
+

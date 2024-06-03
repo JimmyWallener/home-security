@@ -6,15 +6,23 @@
 #include <SPI.h>
 #include "constants.h"
 #include <Keypad.h>
-#include <Http.h>
+#include <HttpsRequest.h>
+#include "MQTT.h"
+#include "AccessLog.h"
 
 using namespace constants;
 
+// classes
 RealTimeClock realTimeClock;
 ESP32Comm esp32Comm;
 WifiManager wifiManager(WIFI_SSID, WIFI_PASSWORD);
-Http http(&wifiManager);
+// MQTT mqtt(&wifiManager);
+HttpsRequest httpsRequest(&wifiManager);
 
+// structs
+AccessLog accessLog;
+
+// Keypad
 Keypad keypad{Keypad(makeKeymap(KEYPAD_KEYS), KEYPAD_ROW_PINS, KEYPAD_COLS_PINS, KEYPAD_ROWS, KEYPAD_COLS)};
 
 
@@ -44,10 +52,17 @@ void setup() {
     Serial.println("############### Connected to WiFi ###############");
     delay(5000);
 
+    /* Serial.println("############### Initializing MQTT ###############");
+    mqtt.connect();
+    Serial.println("############### MQTT successfully initialized ###############");
+    delay(5000); 
+ */
     Serial.println("############### Syncing time with NTP ###############");
-    http.syncTime();
+    httpsRequest.syncTime();
     Serial.println("############### Time is synced ###############");
     delay(5000);
+
+    
 
     Serial.println("############### Setup is completed ###############");
     delay(5000);
@@ -55,13 +70,14 @@ void setup() {
 }
 
 void loop() {
-
+    delay(10);
     updateRealTimeClock();
     handleKeypad();
     while(sendCounter < 2){
-        bool isValid = http.isPinCodeValid("1234");
+        bool isValid = httpsRequest.isPinCodeValid("1234");
         if(isValid) {
             Serial.println("Pin code is valid");
+            
     } else {
         Serial.println("Pin code is not valid");
     }

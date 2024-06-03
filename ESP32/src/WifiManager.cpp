@@ -10,7 +10,6 @@ void WifiManager::connect() {
         delay(500);
         Serial.print(".");
     }
-    Serial.println("WiFi connected");
 }
 
 bool WifiManager::isConnected() {
