@@ -2,12 +2,14 @@
 
 PIRSensor* PIRSensor::pirSensorInstance = nullptr; // Define static instance pointer
 
-PIRSensor::PIRSensor(uint32_t pin) {
+PIRSensor::PIRSensor(uint8_t pin) {
     _pin = pin;
 }
 
+PIRSensor::~PIRSensor() {}
+
 // Set the pin mode to input
-void PIRSensor::begin() {
+void PIRSensor::initialize() {
     pinMode(_pin, INPUT);
     pirSensorInstance = this; // Set static instance to this object
 }

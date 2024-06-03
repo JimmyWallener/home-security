@@ -2,20 +2,33 @@
 #define BUZZER_H
 
 #include <Arduino.h>
+#include "Components.h"
 
-class Buzzer {
-private:
-    uint8_t _buzzerPin;
-    uint16_t _delayTime;
-
+class Buzzer : public Component{
 public:
-    Buzzer() : _buzzerPin(-1), _delayTime(205) {}
     Buzzer(uint8_t buzzerPin, uint16_t delayTime);
-    void begin();
+    ~Buzzer() override;
+
+    void initialize() override;
     void playAlarm();
     void alarmActiveSound();
     void alarmInactiveSound();
+    void keyPressSound();
     void alarmOff();
+    void update();
+    void wrongPassword();
+
+private:
+    void playTones(const int* tones, int tonesLength);
+
+    uint8_t _buzzerPin;
+    uint16_t _delayTime;
+    const int* _tones;
+    int _tonesLength;
+    int _currentToneIndex;
+    bool _isPlaying;
+    unsigned long _lastToneChangeTime;
 };
+
 
 #endif // BUZZER_H

@@ -3,27 +3,24 @@
 
 SoundSensor::SoundSensor(uint8_t digitalPinNumber) : _digitalPinNumber(digitalPinNumber) {}
 
-void SoundSensor::begin() {
+SoundSensor::~SoundSensor() {}
+
+void SoundSensor::initialize() {
     pinMode(_digitalPinNumber, INPUT);
 }
 
-bool SoundSensor::isSoundDetected() {
+/* bool SoundSensor::isSoundDetected() {
     _digitalValue = digitalRead(_digitalPinNumber);
     return _digitalValue == HIGH;
+} */
+
+
+bool SoundSensor::isSoundDetected(){
+    this->_digitalValue = digitalRead(_digitalPinNumber);
+
+    if(this->_digitalValue == HIGH){
+        return true;
+    }else{
+        return false;
+    }
 }
-
-/*
-SoundSensor::SoundSensor(uint8_t ditigtalPinNumber){
-    pinMode(ditigtalPinNumber, INPUT);
-    this->ditigtalPinNumber = ditigtalPinNumber;
-}
-
-void SoundSensor::activateSoundSensor(){
-        this->digitalValue = digitalRead(ditigtalPinNumber);
-
-        if(this->digitalValue == HIGH){
-            // insert alarm logic here for when alarm is active
-        }else{
-            // insert alarm logic here for when alarm is in-active
-        }
-}*/

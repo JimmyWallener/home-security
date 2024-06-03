@@ -1,24 +1,25 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
-#include "SoundSensor.h"
-#include "PIRSensor.h"
-#include "LCD.h"
-#include "Buzzer.h"
-#include "SensorData.h"
-#include "UNOComm.h"
+#include <Arduino.h>
+
+class Component {
+    public:
+        virtual void initialize() = 0;
+        virtual ~Component() = default;
+};
 
 class Components {
-public:
-    SoundSensor soundSensor;
-    PIRSensor pirSensor;
-    LCD lcd;
-    Buzzer buzzer;
-    UNOComm unoComm;
+    public:
+        Components();
+        void addComponent(Component*);
+        void addComponent(Component*[], int );
+        void initializeAll();
 
-    Components(int soundPin, int pirPin, uint8_t rs, uint8_t enable, uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7, int buzzerPin, uint16_t buzzerDelayTime);
-    void begin();
-    SensorData getSensorData();
+    private:
+        static const int MAX_COMPONENTS{10};
+        Component *components[MAX_COMPONENTS];
+        int componentCount;
 };
 
 #endif // COMPONENTS_H

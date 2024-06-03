@@ -2,19 +2,21 @@
 #define PIRSENSOR_H
 
 #include <Arduino.h>
+#include "Components.h"
 
-class PIRSensor {
+class PIRSensor : public Component {
 public:
     PIRSensor() : _pin(-1), _lastTriggerTime(0), _triggerThreshold(10000), _isActive(false) {};
-    PIRSensor(uint32_t pin);
-    void begin(); 
+    PIRSensor(uint8_t);
+    ~PIRSensor() override;
+    void initialize() override;
     void activate();
     void deactivate();
     int update();
-    void setTriggerThreshold(unsigned long threshold);
+    void setTriggerThreshold(unsigned long);
     bool isMotionDetected(); 
 private:
-    uint32_t _pin;
+    uint8_t _pin;
     unsigned long _lastTriggerTime;
     unsigned long _triggerThreshold;
     bool _isActive;

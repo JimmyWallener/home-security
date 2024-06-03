@@ -1,21 +1,30 @@
 #include "Components.h"
 
-Components::Components(int soundPin, int pirPin, uint8_t rs, uint8_t enable, uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7, int buzzerPin, uint16_t buzzerDelayTime)
-    : soundSensor(soundPin), pirSensor(pirPin), lcd(rs, enable, d4, d5, d6, d7), buzzer(buzzerPin, buzzerDelayTime) {}
-
-void Components::begin() {
-    soundSensor.begin();
-    pirSensor.begin();
-    lcd.begin();
-    buzzer.begin();
-    unoComm.begin();
-    pirSensor.activate(); // Activate PIR sensor
+Components::Components() : componentCount(0) {
+    for (int i = 0; i < MAX_COMPONENTS; ++i) {
+        components[i] = nullptr;
+    }
 }
 
-SensorData Components::getSensorData() {
-    SensorData data;
-    data.motionDetected = pirSensor.isMotionDetected();
-    data.soundDetected = soundSensor.isSoundDetected();
-    data.formattedTime = unoComm.getRtcData();
-    return data;
+
+void Components::addComponent(Component* component) {
+    if (componentCount < MAX_COMPONENTS) {
+        components[componentCount++] = component;
+    } else {
+        Serial.println("Error: Maximum number of components reached.");
+    }
+}
+
+void Components::addComponent(Component* componentsArray[], int size) {
+    for (int i = 0; i < size; ++i) {
+        addComponent(componentsArray[i]);
+    }
+}
+
+void Components::initializeAll() {
+    for (int i = 0; i < componentCount; ++i) {
+        if (components[i]) {
+            components[i]->initialize();
+        }
+    }
 }
