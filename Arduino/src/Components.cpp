@@ -21,7 +21,6 @@ void Components::addComponent(Component* componentsArray[], int size) {
     }
 }
 
-
 void Components::initializeAll() {
     for (int i = 0; i < componentCount; ++i) {
         if (components[i]) {
@@ -29,4 +28,3 @@ void Components::initializeAll() {
         }
     }
 }
-

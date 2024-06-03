@@ -24,6 +24,8 @@ int freeMemory() {
     return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
 
+void run();
+
 void setup() {
     Serial.begin(115200);
 
@@ -52,11 +54,15 @@ int timeCounter = 0;
 
 void loop() {
     delay(10);
-    
+    run();
+}
+
+void run() {
     if(unoComm->getState()) {
         buzzer->update();
         unoComm->update();
 
+        // Få denna att funka
         if(pirSensor->isMotionDetected()) {
             alarmCount++;
         }
@@ -64,8 +70,8 @@ void loop() {
         if(soundSensor->isSoundDetected()) {
             alarmCount++;
         }
-
-        if(alarmCount >= 3) {
+        // bort med magical number
+        if(alarmCount >= SENSOR_OCCURENCES) {
             alarmCount = 0;
             while(playingAlarm) {
                 buzzer->playAlarm();
@@ -77,7 +83,8 @@ void loop() {
             }
         }
         timeCounter++;
-        if(timeCounter > 500) {
+        // bort med magical number
+        if(timeCounter > COUNTER_DURATION) {
             timeCounter = 0;
             alarmCount = 0;
         }

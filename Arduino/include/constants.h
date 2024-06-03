@@ -14,6 +14,9 @@ namespace constants {
     constexpr uint8_t BUZZER_DELAY_TIME{205};
     constexpr uint8_t ESP32_I2C_ADDRESS{0x07};
     constexpr uint8_t ARDUINO_I2C_ADDRESS{0x08};
+    constexpr uint8_t SENSOR_OCCURENCES{4};
+    constexpr uint16_t COUNTER_DURATION{500};
+    
 }
 
 #endif // CONSTANTS_H
