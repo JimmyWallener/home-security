@@ -8,7 +8,7 @@
 #include <Keypad.h>
 #include <HttpsRequest.h>
 #include "MQTT.h"
-#include "AccessLog.h"
+
 
 using namespace constants;
 
@@ -16,11 +16,10 @@ using namespace constants;
 RealTimeClock realTimeClock;
 ESP32Comm esp32Comm;
 WifiManager wifiManager(WIFI_SSID, WIFI_PASSWORD);
-// MQTT mqtt(&wifiManager);
+MQTT mqtt(&wifiManager);
 HttpsRequest httpsRequest(&wifiManager);
 
-// structs
-AccessLog accessLog;
+
 
 // Keypad
 Keypad keypad{Keypad(makeKeymap(KEYPAD_KEYS), KEYPAD_ROW_PINS, KEYPAD_COLS_PINS, KEYPAD_ROWS, KEYPAD_COLS)};
@@ -31,7 +30,9 @@ int sendCounter{0};
 void updateRealTimeClock();
 void handleKeypad();
 
+
 void setup() {
+    
     Serial.begin(115200);
     Serial.println("################# Setup started #################");
     delay(5000);
@@ -46,16 +47,16 @@ void setup() {
     Serial.println("####### ESP32Comm successfully initialized #######");
     delay(5000);
 
-    /* Serial.println("########## Establishing WIFI connection ##########");
+    Serial.println("########## Establishing WIFI connection ##########");
     wifiManager.connect();
     Serial.println("############### Connected to WiFi ###############");
-    delay(5000); */
+    delay(5000);
 
     /* Serial.println("############### Initializing MQTT ###############");
     mqtt.connect();
     Serial.println("############### MQTT successfully initialized ###############");
-    delay(5000); 
- */
+    delay(5000);  */
+ 
     Serial.println("############### Syncing time with NTP ###############");
     httpsRequest.syncTime();
     Serial.println("############### Time is synced ###############");

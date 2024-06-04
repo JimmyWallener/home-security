@@ -12,6 +12,7 @@
 class HttpsRequest {
     public:
         HttpsRequest(WifiManager*);
+        ~HttpsRequest();
         bool isPinCodeValid(String);
         void syncTime();
 

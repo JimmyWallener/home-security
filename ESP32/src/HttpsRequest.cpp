@@ -12,6 +12,10 @@ HttpsRequest::HttpsRequest(WifiManager* wifiManager) : _wifiManager(wifiManager)
     this->_mqtt = new MQTT(wifiManager);
 }
 
+HttpsRequest::~HttpsRequest() {
+    delete _mqtt;
+}
+
 /**
  * @brief Synchronize the time with the NTP server. The time is used to generate the authorization token
  *  for Azure Cosmos DB. Becasue the token is valid for a short period of time, the time must be in sync.
@@ -58,7 +62,7 @@ String HttpsRequest::generateAuthToken(const String& verb, const String& resourc
     tempVerb.toLowerCase();
     tempResourceType.toLowerCase();
 
-    const String key = AZURE_COSMO_PRIMARY_KEY;
+    const String key = AZURE_COSMO_SECONDARY_KEY;
     
     const String stringToSign = tempVerb + "\n" +
                                 tempResourceType + "\n" +
@@ -68,11 +72,14 @@ String HttpsRequest::generateAuthToken(const String& verb, const String& resourc
 
     unsigned char* decodedKey;
     size_t decodedKeyLen;
+
+    // Decode the base64 encoded key
     mbedtls_base64_decode(NULL, 0, &decodedKeyLen, (const unsigned char*)key.c_str(), key.length());
     decodedKey = (unsigned char*)malloc(decodedKeyLen);
     mbedtls_base64_decode(decodedKey, decodedKeyLen, &decodedKeyLen, (const unsigned char*)key.c_str(), key.length());
 
     unsigned char hmacResult[32];
+    // Generate the HMAC-SHA256 signature
     mbedtls_md_context_t ctx;
     mbedtls_md_init(&ctx);
     mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 1);
@@ -80,10 +87,11 @@ String HttpsRequest::generateAuthToken(const String& verb, const String& resourc
     mbedtls_md_hmac_update(&ctx, (const unsigned char*)stringToSign.c_str(), stringToSign.length());
     mbedtls_md_hmac_finish(&ctx, hmacResult);
     mbedtls_md_free(&ctx);
-
+    // Free the decoded key
     free(decodedKey);
 
     size_t base64HmacLen;
+    // Encode the HMAC-SHA256 signature in base64
     unsigned char base64Hmac[64];
     mbedtls_base64_encode(base64Hmac, sizeof(base64Hmac), &base64HmacLen, hmacResult, sizeof(hmacResult));
     String signature = String((char*)base64Hmac).substring(0, base64HmacLen);
@@ -107,8 +115,6 @@ String HttpsRequest::generateAuthToken(const String& verb, const String& resourc
 
 bool HttpsRequest::isPinCodeValid(String pinCode) {
 
-        
-
     // Root CA certificate for Azure Cosmos DB, obtained from https://www.digicert.com/kb/digicert-root-certificates.htm
     const char *rootCA = ROOT_CA;
 
@@ -126,16 +132,25 @@ bool HttpsRequest::isPinCodeValid(String pinCode) {
     String date = String(buf);
     date.toLowerCase();
 
-    WiFiClientSecure client;
-    client.setCACert(rootCA);
+    WiFiClientSecure* client = new WiFiClientSecure;
+    if(client) {
+        client->setCACert(rootCA);
+       
+    }
+
+    // Need to set the insecure flag to true, because the Azure Cosmos DB certificate is completely self-signed
+    client->setInsecure();
+
     HTTPClient https;
+    https.setReuse(false);
 
     String url = AZURE_COSMO_DB_URI + "dbs/" + AZURE_COSMO_DB_NAME + "/colls/" + AZURE_COSMO_DB_USER_CONTAINER + "/docs";
     String resourceLink = "dbs/" + AZURE_COSMO_DB_NAME + "/colls/" + AZURE_COSMO_DB_USER_CONTAINER;
     String authorizationToken = generateAuthToken("POST", "docs", resourceLink, date);
 
-    https.begin(client, url);
-     // Set headers for the HTTPS request
+    https.begin(*client, url.c_str());
+    
+    // Set headers for the HTTPS request
     https.addHeader("Content-Type", "application/query+json");
     https.addHeader("x-ms-documentdb-isquery", "true");
     https.addHeader("x-ms-documentdb-query-enablecrosspartition", "true");
@@ -144,6 +159,7 @@ bool HttpsRequest::isPinCodeValid(String pinCode) {
     // Important that the date in the header matches the date used to generate the authorization token
     https.addHeader("x-ms-date", date);
     https.addHeader("x-ms-version", "2018-12-31");
+    // Partition key is required, but not used in this case for searching the entire container
     https.addHeader("x-ms-documentdb-partitionkey", "");
 
    // String query = "{\"query\": \"SELECT * FROM " + AZURE_COSMO_DB_USER_CONTAINER + " c WHERE c.pinCode = @pinCode\", \"parameters\": [{\"name\": \"@pinCode\", \"value\": \"" + pinCode + "\"}]}";
@@ -161,31 +177,34 @@ bool HttpsRequest::isPinCodeValid(String pinCode) {
     serializeJson(doc, requestBody);
 
     int httpResponseCode = https.POST(requestBody);
+    
 
-    Serial.println(https.getString());
 
     if (httpResponseCode > 0) {
         String response = https.getString();
-        Serial.println(response);
 
         JsonDocument responseDoc;
         deserializeJson(responseDoc, response);
-        JsonArray documents = responseDoc["Documents"].as<JsonArray>();
+        JsonObject firstDoc = responseDoc["Documents"][0];
 
-        for (JsonObject doc : documents) {
+        String pin = firstDoc["pinCode"].as<String>();
 
-            String pinCode = doc["pinCode"].as<String>();
-            if (pinCode == pinCode) {
-
-               sendAccessLog(doc["userId"].as<String>(), date, "loginattempt", true);
-
-                // if the pin code is found in the Azure Cosmos DB, return true and end the HTTPS request
-                https.end();
-                return true;
-            }
+        if (pin == pinCode) {
+            // sendAccessLog(firstDoc["userId"].as<String>(), date, "loginattempt", true);
+            // if the pin code is found in the Azure Cosmos DB, return true and end the HTTPS request
+            https.end();
+            delete client;
+            return true;
+        }
+        else {
+            // sendAccessLog("Unknown", date, "loginattempt", false);
+            // if the pin code is not found in the Azure Cosmos DB, return false and end the HTTPS request
+            https.end();
+            delete client;
+            return false;
         }
 
-        sendAccessLog("Unknown", date, "loginattempt", false);
+       // sendAccessLog("Unknown", date, "loginattempt", false);
         // if the pin code is not found in the Azure Cosmos DB, return false and end the HTTPS request
         https.end();
 
@@ -200,7 +219,8 @@ bool HttpsRequest::isPinCodeValid(String pinCode) {
 
     // if the HTTPS request fails, return false
     Serial.println("Request failed");
-    https.end();
+    delete client;
+    https.end(); 
     return false; 
 }
 

@@ -4,32 +4,33 @@ MQTT::MQTT(WifiManager* wifiManager) {
     this->wifiManager = wifiManager;
 }
 
-void MQTT::connect() {
 
-    if (WiFi.status() == WL_CONNECTED) {
-        Serial.println("WiFi connected");
-        if (!Esp32MQTTClient_Init((const u_int8_t*)AZURE_IOT_HUB_PRIMARY_CONNECTION)) {
-            Serial.println("Initializing IoT hub failed.");
+
+void MQTT::connect() {
+    if (this->wifiManager->isConnected()) {
+        Serial.println("WiFi is connected, attempting to connect to IoT Hub...");
+
+        if (Esp32MQTTClient_Init((const uint8_t*)AZURE_IOT_HUB_PRIMARY_CONNECTION, strlen(AZURE_IOT_HUB_PRIMARY_CONNECTION)) == 0) {
+            hasIoTHub = true;
+            Serial.println("IoT Hub connection successful");
+        } else {
             hasIoTHub = false;
-            return;
+            Serial.println("IoT Hub connection failed");
         }
-        hasIoTHub = true;
-        Serial.println("IoT hub initialized");
+    } else {
+        Serial.println("WiFi is not connected, cannot connect to IoT Hub");
     }
+   
 }
 
 void MQTT::sendTelemetry(const String data) {
+   
     if (hasIoTHub) {
-        char buff[128];
-
-        snprintf(buff, sizeof(buff), "{\"%s\":\"%s\"}", data);
-
-        if (!Esp32MQTTClient_SendEvent(buff)) {
-            Serial.println("Sending log failed.");
-            return;
-        }
-
-        Serial.println("Log sent");
-        Esp32MQTTClient_Close();
+        Serial.println("Sending telemetry data: " + data);
+        Esp32MQTTClient_SendEvent(data.c_str());
+    } else {
+        Serial.println("IoT Hub connection is not established, cannot send telemetry data");
     }
+
+    
 }

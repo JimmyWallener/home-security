@@ -10,6 +10,8 @@ void ESP32Comm::begin() {
   Wire.begin();
 }
 
+/// @brief 
+/// @param realTimeClock 
 void ESP32Comm::sendRtcData(RealTimeClock &realTimeClock) {
   Serial.println("RealTimeClock transmission started");
   Wire.beginTransmission(ARDUINO_I2C_ADDRESS);
@@ -24,6 +26,8 @@ void ESP32Comm::sendRtcData(RealTimeClock &realTimeClock) {
   }
 }
 
+/// @brief 
+/// @param sensor 
 void ESP32Comm::sendTriggerEvent(const char *sensor) {
   Wire.beginTransmission(ARDUINO_I2C_ADDRESS);
   Wire.write('T');
@@ -31,6 +35,8 @@ void ESP32Comm::sendTriggerEvent(const char *sensor) {
   Wire.endTransmission();
 }
 
+/// @brief 
+/// @param isActive 
 void ESP32Comm::sendAlarmActivationChange(bool isActive) {
   Wire.beginTransmission(ARDUINO_I2C_ADDRESS);
   Wire.write((isActive ? 'A' : 'D'));

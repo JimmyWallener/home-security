@@ -2,7 +2,8 @@
 #define MQTT_H
 
 #include <WifiManager.h>
-#include "Esp32MQTTClient.h"
+#include <AzureIotHub.h>
+#include <Esp32MQTTClient.h>
 #include "secrets.h"
 
 

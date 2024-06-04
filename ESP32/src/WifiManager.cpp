@@ -5,6 +5,7 @@
 
 // Takes in the SSID and password of the WiFi network to connect to
 void WifiManager::connect() {
+    WiFi.mode(WIFI_STA);
     WiFi.begin(_ssid, _password);
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
