@@ -2,8 +2,10 @@
 #define SENSORLOG_H
 
 #include <ArduinoJson.h>
+#include "generateUUID.h"
 
 struct SensorLog {
+    String id;
     String type = "sensor_log";
     String timestamp;
     String sensorType;
@@ -12,6 +14,7 @@ struct SensorLog {
 
     String toJson() const {
         JsonDocument doc;
+        doc["id"] = generateUUID();
         doc["type"] = type;
         doc["timestamp"] = timestamp;
         doc["sensorType"] = sensorType;
@@ -22,5 +25,7 @@ struct SensorLog {
         return json;
     }
 };
+
+
 
 #endif // SENSORLOG_H

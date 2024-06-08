@@ -6,14 +6,12 @@
 #include "AccessLog.h"
 
 
-
-
-HttpsRequest::HttpsRequest(WifiManager* wifiManager) : _wifiManager(wifiManager){
-    this->_mqtt = new MQTT(wifiManager);
+HttpsRequest::HttpsRequest(WifiManager* wifiManager) : _wifiManager(wifiManager) {
+    
 }
 
 HttpsRequest::~HttpsRequest() {
-    delete _mqtt;
+    delete _wifiManager;
 }
 
 /**
@@ -190,14 +188,14 @@ bool HttpsRequest::isPinCodeValid(String pinCode) {
         String pin = firstDoc["pinCode"].as<String>();
 
         if (pin == pinCode) {
-            // sendAccessLog(firstDoc["userId"].as<String>(), date, "loginattempt", true);
+            sendAccessLog(firstDoc["userId"].as<String>(), date, "loginattempt", true);
             // if the pin code is found in the Azure Cosmos DB, return true and end the HTTPS request
             https.end();
             delete client;
             return true;
         }
         else {
-            // sendAccessLog("Unknown", date, "loginattempt", false);
+            sendAccessLog("Unknown", date, "loginattempt", false);
             // if the pin code is not found in the Azure Cosmos DB, return false and end the HTTPS request
             https.end();
             delete client;
@@ -215,6 +213,8 @@ bool HttpsRequest::isPinCodeValid(String pinCode) {
         Serial.println("Error on HTTPS request");
         Serial.println(httpResponseCode);
         https.end();
+        delete client;
+        return false;
     }
 
     // if the HTTPS request fails, return false
@@ -225,17 +225,128 @@ bool HttpsRequest::isPinCodeValid(String pinCode) {
 }
 
 
+// Send access log to Azure Cosmos DB
 void HttpsRequest::sendAccessLog(const String userId, const String timestamp, const String action, bool success) {
-
-    if(_mqtt == nullptr) {
-        _mqtt->connect();
-    }
-
     AccessLog log;
+    log.id = generateUUID();
     log.userId = userId;
+    log.type = "login_log";
     log.timestamp = timestamp;
     log.action = action;
     log.success = success;
+    Serial.println(log.toJson());
 
-    _mqtt->sendTelemetry(log.toJson());
-} 
+    const char *rootCA = ROOT_CA;
+    if (!_wifiManager->isConnected()) {
+        Serial.println("WiFi is not connected");
+        return;
+    }
+
+    // Get current date in required format
+    time_t now;
+    time(&now);
+    struct tm* timeinfo = gmtime(&now);
+    char buf[50];
+    strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", timeinfo);
+    String date = String(buf);
+    date.toLowerCase();
+
+    WiFiClientSecure* client = new WiFiClientSecure;
+    if(client) {
+        client->setCACert(rootCA);
+    }
+
+    client->setInsecure();
+    HTTPClient https;
+    https.setReuse(false);
+
+    // Update URL and resource link for logs
+    String url = AZURE_COSMO_DB_URI + "dbs/" + AZURE_COSMO_DB_NAME + "/colls/Logs/docs";
+    String resourceLink = "dbs/" + AZURE_COSMO_DB_NAME + "/colls/Logs";
+    String authorizationToken = generateAuthToken("POST", "docs", resourceLink, date);
+
+    https.begin(*client, url.c_str());
+
+    // Set headers for the HTTPS request
+    https.addHeader("Content-Type", "application/json");
+    https.addHeader("Authorization", authorizationToken);
+    https.addHeader("x-ms-date", date);
+    https.addHeader("x-ms-version", "2018-12-31");
+    https.addHeader("x-ms-documentdb-partitionkey", "[\"login_log\"]");
+
+
+    // Send the log data
+    String logData = log.toJson();
+    int httpResponseCode = https.POST(logData);
+
+    if (httpResponseCode > 0) {
+        String response = https.getString();
+        Serial.println("Response from Cosmos DB: " + response);
+    } else {
+        Serial.println("Error sending log to Cosmos DB");
+        Serial.println(httpResponseCode);
+    }
+
+    https.end();
+    delete client;
+}
+
+void HttpsRequest::sendSensorLogToCosmo(const JsonDocument& doc) {
+    const char *rootCA = ROOT_CA;
+    if (!_wifiManager->isConnected()) {
+        Serial.println("WiFi is not connected");
+        return;
+    }
+
+    // Get current date in required format
+    time_t now;
+    time(&now);
+    struct tm* timeinfo = gmtime(&now);
+    char buf[50];
+    strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", timeinfo);
+    String date = String(buf);
+    date.toLowerCase();
+
+    WiFiClientSecure* client = new WiFiClientSecure;
+    if(client) {
+        client->setCACert(rootCA);
+    }
+
+    // Need to set the insecure flag to true, because the root CA certificate has no private key
+    client->setInsecure();
+    HTTPClient https;
+    https.setReuse(false);
+
+    // Update URL and resource link for logs
+    String url = AZURE_COSMO_DB_URI + "dbs/" + AZURE_COSMO_DB_NAME + "/colls/SensorLog/docs";
+    String resourceLink = "dbs/" + AZURE_COSMO_DB_NAME + "/colls/SensorLog";
+    String authorizationToken = generateAuthToken("POST", "docs", resourceLink, date);
+
+    https.begin(*client, url.c_str());
+
+    // Set headers for the HTTPS request
+    https.addHeader("Content-Type", "application/json");
+    https.addHeader("Authorization", authorizationToken);
+    https.addHeader("x-ms-date", date);
+    https.addHeader("x-ms-version", "2018-12-31");
+    https.addHeader("x-ms-documentdb-partitionkey", "[\"sensor_data\"]");
+
+    // Send the log data
+    String logData;
+
+    serializeJson(doc, logData);
+    int httpResponseCode = https.POST(logData);
+
+    if (httpResponseCode > 0) {
+        String response = https.getString();
+        Serial.println("Response from Cosmos DB: " + response);
+    } else {
+        Serial.println("Error sending log to Cosmos DB");
+        Serial.println(httpResponseCode);
+    }
+
+    https.end();
+    delete client;
+}
+
+

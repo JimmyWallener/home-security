@@ -59,7 +59,7 @@ void ESP32Comm::sendKeypadData(char key) {
   Wire.endTransmission();
 }
 
-JsonDocument ESP32Comm::requestDataFromPeripheral() {
+void ESP32Comm::requestDataFromPeripheral(HttpsRequest& httpsRequest) {
 
   String message{};
   JsonDocument doc;
@@ -69,6 +69,14 @@ JsonDocument ESP32Comm::requestDataFromPeripheral() {
     char c = Wire.read();
     message += c;
   }
-  deserializeJson(doc, message);
-  return doc;
+
+  Serial.println(message);
+  Serial.println(message.length());
+
+  /* if(message.length() != 0) {
+    deserializeJson(doc, message);
+    httpsRequest.sendSensorLogToCosmo(doc);
+  } */
+
+  
 }

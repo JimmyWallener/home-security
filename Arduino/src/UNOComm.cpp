@@ -7,31 +7,31 @@ using namespace constants;
 UNOComm *UNOComm::instance = nullptr;
 
 // Set pointer to current instance
-UNOComm::UNOComm() : lcd(nullptr), sensorLog(nullptr), buzzer(nullptr){
+UNOComm::UNOComm() : _lcd(nullptr), _sensorLog(nullptr), _buzzer(nullptr){
     instance = this;
 }
 
 UNOComm::~UNOComm() {
-    if(lcd) {
-        delete lcd;
+    if(_lcd) {
+        delete _lcd;
     }
-    if (sensorLog) {
-        delete sensorLog;
+    if (_sensorLog) {
+        delete _sensorLog;
     }
-    if (buzzer) {
-        delete buzzer;
+    if (_buzzer) {
+        delete _buzzer;
     }
 }
 
 void UNOComm::initialize() {
     Wire.begin(ARDUINO_I2C_ADDRESS); // Join I2C bus with address #8
     Wire.onReceive(onReceive);
-    Wire.onRequest(sendLogDataToESP32);
+    Wire.onRequest(onRequest);
     Serial.println("UNOComm initialized and ready to receive data.");
 }
 
 void UNOComm::setLCD(LCD *lcd) {
-    this->lcd = lcd;
+    this->_lcd = lcd;
 }
 
 
@@ -58,9 +58,6 @@ void UNOComm::processI2CCommand(int numBytes){
                 break;
             case 'D': // Alarm Deactivation
                 instance->handleAlarmActivation(command);
-                break;
-            case 'S': // Alarm Status Request
-                instance->handleAlarmStatusRequest();
                 break;
             case 'P': // Pin Code Feedback
                 instance->handlePinCodeFeedback();
@@ -103,67 +100,66 @@ void UNOComm::handleTriggerEvent() {
 }
 
 void UNOComm::handleKeypadData() {
-    buzzer->keyPressSound();
+    _buzzer->keyPressSound();
     char key = Wire.read();
 
     if (key == 'D' && _pinCode.length() > 0) {
         Serial.println("Delete key pressed");
         _pinCode.remove(_pinCode.length() - 1, 1);
         _userInputtedPassword.remove(_userInputtedPassword.length() - 1, 1);
-        Serial.println(_pinCode);
     } else if (key != 'D' && _pinCode.length() < 4) {
-        _pinCode += '*';
-        this->_userInputtedPassword += key;
-        Serial.println(_pinCode);
+        if (key == 'C') {
+            _pinCode = "";
+            _userInputtedPassword = "";
+        } else {
+            _pinCode += '*';
+            _userInputtedPassword += key;
+        }
+       
     }
 
     // Update the display immediately
-    if (lcd) {
-        lcd->setCursor(0, 1);
-        lcd->print("                ");  // Clear the line
-        lcd->setCursor(0, 1);
-        lcd->print(_pinCode);
+    if (_lcd) {
+        _lcd->setCursor(0, 1);
+        _lcd->print("                ");  // Clear the line
+        _lcd->setCursor(0, 1);
+        _lcd->print(_pinCode);
     }
 
     if(_userInputtedPassword.length() == 4) {
-        if(checkPassword()) {
-            lcd->setCursor(0, 1);
+        if(_alarmActivated) {
+            _lcd->setCursor(0, 1);
             switchState();
             _userInputtedPassword.remove(0, 4);
         } else {
-            lcd->setCursor(0, 1);
-            lcd->print("Wrong Password");
-            buzzer->wrongPassword();
+            _lcd->setCursor(0, 1);
+            _lcd->print("Wrong Password");
+            _buzzer->wrongPassword();
         }
     }
 
     // Clear _pinCode after 4 digits and displayMessage timer has passed
-    if (_pinCode.length() == 4 && millis() >= messageClearTime) {
+    if (_pinCode.length() == 4 && millis() >= _messageClearTime) {
         _pinCode.remove(0, 4);
         _userInputtedPassword.remove(0, 4);
     }
     
     // Update the message clear time
-    messageClearTime = millis() + 1000;  // Set the duration for the message to be displayed
+    _messageClearTime = millis() + 1000;  // Set the duration for the message to be displayed
 }
 
 void UNOComm::handleAlarmActivation(char command) {
     if(command == 'A') {
+        _alarmActivated = true;
         displayTemporaryMessage("Alarm is active", 5000);
     } else {
+        _alarmActivated = false;
         displayTemporaryMessage("Alarm is offline", 5000);
     }
 }
 
-void UNOComm::handleAlarmStatusRequest() {
-    // TODO: Implement alarm status request handling. Send alarm status to ESP32
-    // For now, just print a message
-    Serial.println("Alarm status requested.");
-}
 
 void UNOComm::handlePinCodeFeedback() {
-    // TODO: Implement pin code feedback handling.  Payload from ESP32 is a boolean and an integer: success and attempts left
-    // For now, just print a message
     bool success = Wire.read();
     int attemptsLeft = Wire.read();
     if(success) {
@@ -175,31 +171,31 @@ void UNOComm::handlePinCodeFeedback() {
 }
 
 void UNOComm::displayTemporaryMessage(const String &message, unsigned long duration) {
-    if(lcd) {
-        lcd->setCursor(0, 1);
-        lcd->print(message);
-        messageClearTime = millis() + duration;
+    if(_lcd) {
+        _lcd->setCursor(0, 1);
+        _lcd->print(message);
+        _messageClearTime = millis() + duration;
         updateLCD();
     }
 }
 
 void UNOComm::updateLCD() {
-    if (lcd) {
+    if (_lcd) {
         
-        lcd->setCursor(0, 0);
-        lcd->print(getRealTimeClock());
+        _lcd->setCursor(0, 0);
+        _lcd->print(getRealTimeClock());
 
         // Clear second line after message duration has passed
-        if (millis() >= messageClearTime && messageClearTime != 0) {
-            lcd->setCursor(0, 1);
-            lcd->print("                ");
-            messageClearTime = 0;
+        if (millis() >= _messageClearTime && _messageClearTime != 0) {
+            _lcd->setCursor(0, 1);
+            _lcd->print("                ");
+            _messageClearTime = 0;
         }
     }
 }
 
 void UNOComm::update() {
-    if (millis() - _lastLCDUpdateTime >= lcdUpdateInterval) {
+    if (millis() - _lastLCDUpdateTime >= _lcdUpdateInterval) {
         _lastLCDUpdateTime = millis();
         updateLCD();
     }
@@ -207,53 +203,71 @@ void UNOComm::update() {
 
 
 void UNOComm::sendLogDataToESP32() {
-
-    String sensorLog = "Testing";
-
-    for (char c : sensorLog) {
-        Wire.write(c);
+    if (_sensorLog == nullptr) {
+        Serial.println("SensorLog is null, nothing to send.");
+        return;
     }
+
+    String logData = _sensorLog->toJson();
+    Serial.println("Sending log data to ESP32: " + logData);
+    Serial.println("Log data length: " + String(logData.length()));
+
+    if (logData.length() == 0) {
+        Serial.println("Log data is empty, not sending.");
+        return;
+    }
+/* 
+    for (char c : logData) {
+        Wire.write(c);
+    } 
+    Wire.write('\0');  // Null-terminate the string
+    Wire.endTransmission();*/
+
+    Serial.println(logData);
+
+    // set _sensorLog to nullptr after sending the data
+    _sensorLog = nullptr;
 }
 
-void UNOComm::setSensorLog(SensorLog *sensorLog) {
-    this->sensorLog = sensorLog;
+void UNOComm::setSensorLog(SensorLog* sensorLog) {
+    if (sensorLog == nullptr) {
+        Serial.println("Trying to set a null SensorLog.");
+        return;
+    }
+
+    _sensorLog = sensorLog;
+    Serial.println("SensorLog set with data: " + _sensorLog->toJson());
 }
 
 void UNOComm::setBuzzer(Buzzer *buzzer) {
-    this->buzzer = buzzer;
+    this->_buzzer = buzzer;
 }
 
-bool UNOComm::checkPassword() {
-    for(int i = 0; i < 4; i++) {
-        if(_userInputtedPassword[i] != _password[i]) {
-            return false; 
-        }
-    }
-    return true;
+SensorLog* UNOComm::getSensorLog() {
+    return _sensorLog;
 }
+
+
 
 void UNOComm::switchState() {
-    switch (this->_state)
-            {
-            case 0:
-                this->_state = 1;
-                lcd->print("Alarm Activated");
-                break;
-
-            case 1:
-                this->_state = 0;
-                lcd->print("Deactivated");
-                break;
-
-            default:
-                break;
-            }
+    if (this->_state == 0) {
+        this->_state = 1;
+        _lcd->print("Alarm Activated");
+        Serial.println("Switching state to Activated");
+    } else {
+        this->_state = 0;
+        _lcd->print("Deactivated");
+        Serial.println("Switching state to Deactivated");
+    }
 }
 
 bool UNOComm::getState() {
-    if(this->_state == 1) {
-        return true;
-    } else {
-        return false;
-    }
+    Serial.print("Current state is: ");
+    Serial.println(this->_state);
+   return this->_state == 1;
+}
+
+void UNOComm::onRequest() {
+    if(instance != nullptr)
+        instance->sendLogDataToESP32();
 }

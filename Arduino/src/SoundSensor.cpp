@@ -9,12 +9,6 @@ void SoundSensor::initialize() {
     pinMode(_digitalPinNumber, INPUT);
 }
 
-/* bool SoundSensor::isSoundDetected() {
-    _digitalValue = digitalRead(_digitalPinNumber);
-    return _digitalValue == HIGH;
-} */
-
-
 bool SoundSensor::isSoundDetected(){
     this->_digitalValue = digitalRead(_digitalPinNumber);
 

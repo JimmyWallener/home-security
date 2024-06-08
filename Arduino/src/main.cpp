@@ -6,6 +6,7 @@
 #include "Buzzer.h"
 #include "PIRSensor.h"
 #include "UNOComm.h"
+#include "SensorLog.h"
 
 using namespace constants;
 
@@ -42,7 +43,7 @@ void setup() {
 
 bool playingAlarm = true;
 int alarmCount = 0;
-int timeCounter = 0; 
+unsigned short timeCounter = 0; 
 
 void loop() {
     delay(10);
@@ -53,14 +54,26 @@ void run() {
     if(unoComm->getState()) {
         buzzer->update();
         unoComm->update();
-
+        Serial.println("run update");
         // Få denna att funka
         if(pirSensor->isMotionDetected()) {
             alarmCount++;
+            SensorLog *sensorLog;
+            sensorLog->sensorType = "motion";
+            sensorLog->sensorId = "pirSensor";
+            sensorLog->timestamp = unoComm->getRealTimeClock();
+            sensorLog->type = true;
+            unoComm->setSensorLog(sensorLog);
         }
 
         if(soundSensor->isSoundDetected()) {
             alarmCount++;
+            SensorLog *sensorLog;
+            sensorLog->sensorType = "sound";
+            sensorLog->sensorId = "soundSensor";
+            sensorLog->timestamp = unoComm->getRealTimeClock();
+            sensorLog->type = true;
+            unoComm->setSensorLog(sensorLog);
         }
         // bort med magical number
         if(alarmCount >= SENSOR_OCCURENCES) {

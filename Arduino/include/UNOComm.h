@@ -19,35 +19,35 @@ public:
     void setBuzzer(Buzzer*);
     static UNOComm *instance;
     String getRealTimeClock();
+    SensorLog *getSensorLog();
     void updateLCD();
     void update();
     bool getState();
 
 private:
     String _dateTime{};
-    LCD *lcd;
-    SensorLog *sensorLog;
-    Buzzer *buzzer;
+    LCD *_lcd;
+    SensorLog *_sensorLog{nullptr};
+    Buzzer *_buzzer;
     String _pinCode{};
     String _userInputtedPassword;
-    const String _password = "1234";
     uint8_t _state = 0;
+    bool _alarmActivated = false;
     unsigned long _lastLCDUpdateTime{0};
-    const unsigned long lcdUpdateInterval{1000};
+    const unsigned long _lcdUpdateInterval{1000};
 
     static void onReceive(int);
-    unsigned long messageClearTime{0};
+    static void onRequest();
+    unsigned long _messageClearTime{0};
     void handleTriggerEvent();
     void switchState();
     void processI2CCommand(int);
     void setRealTimeClock();
     void handleKeypadData();
     void handleAlarmActivation(char);
-    void handleAlarmStatusRequest();
     void handlePinCodeFeedback();
-    bool checkPassword();
     void displayTemporaryMessage(const String&, unsigned long);
-    static void sendLogDataToESP32();
+    void sendLogDataToESP32();
 
 };
 

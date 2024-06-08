@@ -1,9 +1,8 @@
 #include "WifiManager.h"
 
+WifiManager::WifiManager(const char* ssid, const char* password) 
+    : _ssid(ssid), _password(password) {}
 
-
-
-// Takes in the SSID and password of the WiFi network to connect to
 void WifiManager::connect() {
     WiFi.mode(WIFI_STA);
     WiFi.begin(_ssid, _password);
@@ -15,4 +14,8 @@ void WifiManager::connect() {
 
 bool WifiManager::isConnected() {
     return WiFi.status() == WL_CONNECTED;
+}
+
+WiFiClientSecure& WifiManager::getWifiClient() {
+    return _wifiClient;
 }

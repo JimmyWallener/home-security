@@ -7,7 +7,7 @@
 #include "constants.h"
 #include <Keypad.h>
 #include <HttpsRequest.h>
-#include "MQTT.h"
+#include "AccessLog.h"
 
 
 using namespace constants;
@@ -16,16 +16,16 @@ using namespace constants;
 RealTimeClock realTimeClock;
 ESP32Comm esp32Comm;
 WifiManager wifiManager(WIFI_SSID, WIFI_PASSWORD);
-MQTT mqtt(&wifiManager);
 HttpsRequest httpsRequest(&wifiManager);
-
-
 
 // Keypad
 Keypad keypad{Keypad(makeKeymap(KEYPAD_KEYS), KEYPAD_ROW_PINS, KEYPAD_COLS_PINS, KEYPAD_ROWS, KEYPAD_COLS)};
 
 int lastMinute{-1}; // Last minute that was sent to Arduino UNO
-int sendCounter{0};
+int loginAttempts{3};
+char pinCode[4]{'\0', '\0', '\0', '\0'};
+bool alarmActive{false};
+char initKey{'#'};
 
 void updateRealTimeClock();
 void handleKeypad();
@@ -52,10 +52,6 @@ void setup() {
     Serial.println("############### Connected to WiFi ###############");
     delay(5000);
 
-    /* Serial.println("############### Initializing MQTT ###############");
-    mqtt.connect();
-    Serial.println("############### MQTT successfully initialized ###############");
-    delay(5000);  */
  
     Serial.println("############### Syncing time with NTP ###############");
     httpsRequest.syncTime();
@@ -70,21 +66,40 @@ void setup() {
 }
 
 void loop() {
-    delay(10);
+    char key = keypad.getKey();
     updateRealTimeClock();
-    handleKeypad();
-    while(sendCounter < 2){
-        bool isValid = httpsRequest.isPinCodeValid("1234");
-        if(isValid) {
-            Serial.println("Pin code is valid");
-            
-    } else {
-        Serial.println("Pin code is not valid");
+   // esp32Comm.requestDataFromPeripheral(httpsRequest);
+
+    if (key == initKey) {
+        handleKeypad();
+        while(loginAttempts > 0){
+        
+        // check if pincode has been entered
+        if(pinCode[0] != '\0' && pinCode[1] != '\0' && pinCode[2] != '\0' && pinCode[3] != '\0'){
+            bool isValid = httpsRequest.isPinCodeValid(String(pinCode));
+            if(isValid) {
+                esp32Comm.sendPinCodeFeedback(true, loginAttempts);
+                esp32Comm.sendAlarmActivationChange(alarmActive);
+                alarmActive = !alarmActive;
+                loginAttempts = 3;
+                for (int i = 0; i < 4; i++) {
+                pinCode[i] = '\0';
+            }
+            } else {
+            esp32Comm.sendPinCodeFeedback(false, loginAttempts);
+            loginAttempts--;
+            if(loginAttempts == 1) {
+                esp32Comm.sendTriggerEvent("Alarm");
+            }
+            for (int i = 0; i < 4; i++) {
+                pinCode[i] = '\0';
+            }
     }
-        sendCounter++;
-        delay(1000);
+    
     }
-   
+}
+
+    
 }
 
 void updateRealTimeClock() {
@@ -101,9 +116,35 @@ void updateRealTimeClock() {
 
 void handleKeypad() {
     
-    char key = keypad.getKey();
-    if (key) {
-        Serial.println(key);
-        esp32Comm.sendKeypadData(key);
+    while(pinCode[0] == '\0' || pinCode[1] == '\0' || pinCode[2] == '\0' || pinCode[3] == '\0') {
+        char key = keypad.getKey();
+        if (key) {
+            if(key == 'D'){
+                esp32Comm.sendKeypadData(key);
+                // delete last entry in char array
+                for (int i = 3; i >= 0; i--) {
+                    if (pinCode[i] != '\0') {
+                        pinCode[i] = '\0';
+                        break;
+                    }
+                }
+                break;
+            }
+            if(key == 'C'){
+                esp32Comm.sendKeypadData(key);
+                // delete all entries in char array
+                for (int i = 0; i < 4; i++) {
+                    pinCode[i] = '\0';
+                }
+                break;
+            }
+            esp32Comm.sendKeypadData(key);
+            for (int i = 0; i < 4; i++) {
+                if (pinCode[i] == '\0') {
+                    pinCode[i] = key;
+                    break;
+                }
+            }
+        }
     }
 }
