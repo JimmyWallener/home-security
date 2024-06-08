@@ -18,9 +18,8 @@ Buzzer *buzzer = new Buzzer(BUZZER_PIN, BUZZER_DELAY_TIME);
 PIRSensor *pirSensor = new PIRSensor(PASSIVE_IR_SENSOR_PIN);
 UNOComm *unoComm = new UNOComm;
 
-
-
 void run();
+void sendLog(String sensorType, String sensorId);
 
 void setup() {
     Serial.begin(115200);
@@ -43,7 +42,7 @@ void setup() {
 
 bool playingAlarm = true;
 int alarmCount = 0;
-unsigned short timeCounter = 0; 
+unsigned short timeCounter = 0;
 
 void loop() {
     delay(10);
@@ -51,52 +50,66 @@ void loop() {
 }
 
 void run() {
-    if(unoComm->getState()) {
+    if (unoComm->getState()) {
         buzzer->update();
         unoComm->update();
         Serial.println("run update");
-        // Få denna att funka
-        if(pirSensor->isMotionDetected()) {
+
+        if (pirSensor->isMotionDetected()) {
             alarmCount++;
-            SensorLog *sensorLog;
-            sensorLog->sensorType = "motion";
-            sensorLog->sensorId = "pirSensor";
-            sensorLog->timestamp = unoComm->getRealTimeClock();
-            sensorLog->type = true;
-            unoComm->setSensorLog(sensorLog);
+            if(alarmCount >= SENSOR_OCCURENCES) {
+                sendLog("motion", "pirSensor");
+                alarmCount = 0;
+            }
+            
         }
 
-        if(soundSensor->isSoundDetected()) {
+        if (soundSensor->isSoundDetected()) {
             alarmCount++;
-            SensorLog *sensorLog;
-            sensorLog->sensorType = "sound";
-            sensorLog->sensorId = "soundSensor";
-            sensorLog->timestamp = unoComm->getRealTimeClock();
-            sensorLog->type = true;
-            unoComm->setSensorLog(sensorLog);
+            if(alarmCount >= SENSOR_OCCURENCES) {
+                sendLog("sound", "soundSensor");
+                alarmCount = 0;
+            }
         }
-        // bort med magical number
-        if(alarmCount >= SENSOR_OCCURENCES) {
+
+        if (alarmCount >= SENSOR_OCCURENCES) {
             alarmCount = 0;
-            while(playingAlarm) {
+            while (playingAlarm) {
                 buzzer->playAlarm();
                 buzzer->update();
                 unoComm->update();
-                if(!unoComm->getState()) {
+                if (!unoComm->getState()) {
                     playingAlarm = false;
                 }
             }
         }
         timeCounter++;
-        // bort med magical number
-        if(timeCounter > COUNTER_DURATION) {
+        if (timeCounter > COUNTER_DURATION) {
             timeCounter = 0;
             alarmCount = 0;
         }
         playingAlarm = true;
-    
     } else {
         buzzer->update();
         unoComm->update();
+    }
+}
+
+
+void sendLog(String sensorType, String sensorId) {
+    SensorLog sensorLog;
+    sensorLog.sensorType = sensorType;
+    sensorLog.sensorId = sensorId;
+    sensorLog.timestamp = unoComm->getRealTimeClock();
+    sensorLog.value = true;
+    
+    // Kontrollera genererad JSON
+    String logData = sensorLog.toJson();
+    Serial.println("Prepared SensorLog JSON: " + logData);
+
+    if (!logData.length() == 0) {
+        unoComm->setSensorLog(&sensorLog);
+    } else {
+        Serial.println("Error: Log data is empty, not setting SensorLog.");
     }
 }

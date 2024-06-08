@@ -22,7 +22,7 @@ public:
     SensorLog *getSensorLog();
     void updateLCD();
     void update();
-    bool getState();
+    bool getState() const;
 
 private:
     String _dateTime{};
@@ -32,6 +32,7 @@ private:
     String _pinCode{};
     String _userInputtedPassword;
     uint8_t _state = 0;
+    unsigned long _lastKeypadInputTime{0};
     bool _alarmActivated = false;
     unsigned long _lastLCDUpdateTime{0};
     const unsigned long _lcdUpdateInterval{1000};
