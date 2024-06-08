@@ -22,8 +22,9 @@ HttpsRequest httpsRequest(&wifiManager);
 Keypad keypad{Keypad(makeKeymap(KEYPAD_KEYS), KEYPAD_ROW_PINS, KEYPAD_COLS_PINS, KEYPAD_ROWS, KEYPAD_COLS)};
 
 int lastMinute{-1}; // Last minute that was sent to Arduino UNO
-int loginAttempts{3};
+int loginAttempts{2};
 char pinCode[4]{'\0', '\0', '\0', '\0'};
+
 bool alarmActive{false};
 char initKey{'#'};
 
@@ -81,24 +82,29 @@ void loop() {
                 esp32Comm.sendPinCodeFeedback(true, loginAttempts);
                 esp32Comm.sendAlarmActivationChange(alarmActive);
                 alarmActive = !alarmActive;
-                loginAttempts = 3;
+                loginAttempts = 2;
                 for (int i = 0; i < 4; i++) {
                 pinCode[i] = '\0';
             }
             } else {
             esp32Comm.sendPinCodeFeedback(false, loginAttempts);
             loginAttempts--;
-            if(loginAttempts == 1) {
-                esp32Comm.sendTriggerEvent("Alarm");
-            }
-            for (int i = 0; i < 4; i++) {
+            if(loginAttempts == 0) {
+                loginAttempts = 2;
+                for (int i = 0; i < 4 ; i++) {
                 pinCode[i] = '\0';
+            }
+            } else {
+                // clear pincode input
+                for (int i = 0; i < 4; i++) {
+                pinCode[i] = '\0';
+            }
             }
     }
     
     }
 }
-
+    }
     
 }
 
