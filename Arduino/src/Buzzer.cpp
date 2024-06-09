@@ -28,6 +28,7 @@ void Buzzer::alarmActiveSound() {
 void Buzzer::alarmInactiveSound() {
     static const int tones[] = {554, 523, 494, 466, 440};
     playTones(tones, sizeof(tones) / sizeof(tones[0]));
+    noTone(_buzzerPin);
 }
 
 void Buzzer::wrongPassword() {
@@ -53,6 +54,7 @@ void Buzzer::update() {
             tone(_buzzerPin, _tones[_currentToneIndex]);
         } else {
             _isPlaying = false;
+            noTone(_buzzerPin);
         }
     }
 }

@@ -15,7 +15,7 @@ class HttpsRequest {
         HttpsRequest(WifiManager*);
         ~HttpsRequest();
         bool isPinCodeValid(String);
-        void sendSensorLogToCosmo(const JsonDocument &);
+        void sendSensorLogToCosmo(const String&);
         void syncTime();
 
     private:

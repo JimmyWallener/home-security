@@ -6,7 +6,7 @@
 #include "Buzzer.h"
 #include "PIRSensor.h"
 #include "UNOComm.h"
-#include "SensorLog.h"
+
 
 using namespace constants;
 
@@ -19,59 +19,75 @@ PIRSensor *pirSensor = new PIRSensor(PASSIVE_IR_SENSOR_PIN);
 UNOComm *unoComm = new UNOComm;
 
 void run();
-void sendLog(String sensorType, String sensorId);
+
 
 void setup() {
     Serial.begin(115200);
 
     Component *componentArray[] = {soundSensor, lcd, buzzer, pirSensor, unoComm};
     int numberOfComponents = sizeof(componentArray) / sizeof(componentArray[0]);
-    Serial.print("Number of components to add: ");
-    Serial.println(numberOfComponents);
 
     components.addComponent(componentArray, numberOfComponents);
-    Serial.println("Components added");
     delay(1000);
     components.initializeAll();
     delay(1000);
     unoComm->setLCD(lcd);
     unoComm->setBuzzer(buzzer);
-    Serial.println("Components initialized");
     delay(1000);
 }
 
-bool playingAlarm = true;
-int alarmCount = 0;
-unsigned short timeCounter = 0;
 
 void loop() {
     delay(10);
     run();
 }
 
+
+
+bool playingAlarm{true};
+uint16_t alarmCount{0};
+uint16_t sensorCount{0};
+unsigned short timeCounter{0};
+unsigned long lastMotionTime{0};
+unsigned long lastSoundTime{0};
+
+
 void run() {
+    unsigned long currentTime = millis();
+
     if (unoComm->getState()) {
         buzzer->update();
         unoComm->update();
-        Serial.println("run update");
 
-        if (pirSensor->isMotionDetected()) {
-            alarmCount++;
-            if(alarmCount >= SENSOR_OCCURENCES) {
-                sendLog("motion", "pirSensor");
-                alarmCount = 0;
-            }
-            
-        }
+        bool motionDetected = pirSensor->isMotionDetected();
+        bool soundDetected = soundSensor->isSoundDetected();
 
-        if (soundSensor->isSoundDetected()) {
-            alarmCount++;
-            if(alarmCount >= SENSOR_OCCURENCES) {
-                sendLog("sound", "soundSensor");
-                alarmCount = 0;
+        if (motionDetected) {
+            lastMotionTime = currentTime;
+            sensorCount++;
+            if (sensorCount >= SENSOR_THRESHOLD) {
+                unoComm->setSensorLog("motion", "pirSensor", true);
+                alarmCount++;
+                sensorCount = 0;
             }
         }
 
+        if (soundDetected) {
+            lastSoundTime = currentTime;
+            sensorCount++;
+            if (sensorCount >= SENSOR_THRESHOLD) {
+                unoComm->setSensorLog("sound", "soundSensor", true);
+                alarmCount++;
+                sensorCount = 0;
+            }
+        }
+
+        // Check if no motion or sound has been detected for a while
+        if (!motionDetected && !soundDetected && (currentTime - lastMotionTime > RESET_DELAY) && (currentTime - lastSoundTime > RESET_DELAY)) {
+            alarmCount = 0;
+        }
+
+        // Trigger alarm if the sensor has been triggered SENSOR_OCCURENCES times
         if (alarmCount >= SENSOR_OCCURENCES) {
             alarmCount = 0;
             while (playingAlarm) {
@@ -80,6 +96,7 @@ void run() {
                 unoComm->update();
                 if (!unoComm->getState()) {
                     playingAlarm = false;
+                    buzzer->alarmInactiveSound();
                 }
             }
         }
@@ -96,20 +113,5 @@ void run() {
 }
 
 
-void sendLog(String sensorType, String sensorId) {
-    SensorLog sensorLog;
-    sensorLog.sensorType = sensorType;
-    sensorLog.sensorId = sensorId;
-    sensorLog.timestamp = unoComm->getRealTimeClock();
-    sensorLog.value = true;
-    
-    // Kontrollera genererad JSON
-    String logData = sensorLog.toJson();
-    Serial.println("Prepared SensorLog JSON: " + logData);
 
-    if (!logData.length() == 0) {
-        unoComm->setSensorLog(&sensorLog);
-    } else {
-        Serial.println("Error: Log data is empty, not setting SensorLog.");
-    }
-}
+

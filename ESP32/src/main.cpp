@@ -67,12 +67,15 @@ void setup() {
 void loop() {
     char key = keypad.getKey();
     updateRealTimeClock();
+    /* if(alarmActive){
+        esp32Comm.requestDataFromPeripheral(httpsRequest);
+    } */
+    
 
     if (key == '#') {
         isEnteringPin = true;
         pinIndex = 0;
         memset(pinCode, '\0', sizeof(pinCode)); // Clear the pin code buffer
-        Serial.println("Enter PIN:");
     }
 
     if (isEnteringPin) {
@@ -102,7 +105,6 @@ void handleKeypad(char key) {
         memset(pinCode, '\0', sizeof(pinCode)); // Clear the pin code buffer
         pinIndex = 0;
         isEnteringPin = false;
-        Serial.println("Timeout! Pin code input reset.");
         return;
     }
 
@@ -114,34 +116,23 @@ void handleKeypad(char key) {
             if (pinIndex > 0) {
                 pinCode[--pinIndex] = '\0'; // Remove the last digit
             }
-            Serial.print("Pin after delete: ");
-            Serial.println(pinCode);
         } else if (key == 'C') {
             memset(pinCode, '\0', sizeof(pinCode)); // Clear the pin code buffer
             pinIndex = 0;
-            Serial.println("Pin code cleared.");
         } else if (pinIndex < 4 && isdigit(key)) { // Allowing only digits
             pinCode[pinIndex++] = key;
-            Serial.print("Pin so far: ");
-            Serial.println(pinCode);
-
-            if (pinIndex == 4) {
-                // Check the pin code
-                Serial.print("Checking pin code: ");
-                Serial.println(pinCode);
+           if (pinIndex == 4) {
 
                 bool isValid = httpsRequest.isPinCodeValid(String(pinCode));
                 if (isValid) {
                     esp32Comm.sendPinCodeFeedback(true, loginAttempts);
-                    alarmActive = !alarmActive;
                     esp32Comm.sendAlarmActivationChange(alarmActive);
-                    Serial.println("Alarm state changed.");
+                    alarmActive = !alarmActive;
                 } else {
                     esp32Comm.sendPinCodeFeedback(false, loginAttempts);
                     loginAttempts--;
 
                     if (loginAttempts == 0) {
-                        Serial.println("No attempts left, resetting.");
                         loginAttempts = 2;
                     }
                 }

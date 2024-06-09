@@ -1,13 +1,15 @@
 #include "UNOComm.h"
 #include "constants.h"
 
+#include <ArduinoJson.h>
+
 using namespace constants;
 
 // Initiate static instance pointer
 UNOComm *UNOComm::instance = nullptr;
 
 // Set pointer to current instance
-UNOComm::UNOComm() : _lcd(nullptr), _sensorLog(nullptr), _buzzer(nullptr), _alarmActivated(false) {
+UNOComm::UNOComm() : _lcd(nullptr), _buzzer(nullptr), _alarmActivated(false) {
     instance = this;
 }
 
@@ -15,19 +17,16 @@ UNOComm::~UNOComm() {
     if (_lcd) {
         delete _lcd;
     }
-    if (_sensorLog) {
-        delete _sensorLog;
-    }
     if (_buzzer) {
         delete _buzzer;
     }
+  
 }
 
 void UNOComm::initialize() {
     Wire.begin(ARDUINO_I2C_ADDRESS); // Join I2C bus with address #8
     Wire.onReceive(onReceive);
     Wire.onRequest(onRequest);
-    Serial.println("UNOComm initialized and ready to receive data.");
 }
 
 void UNOComm::setLCD(LCD *lcd) {
@@ -46,9 +45,6 @@ void UNOComm::processI2CCommand(int numBytes) {
         case 'R': // RTC Data
             instance->setRealTimeClock();
             break;
-        case 'T': // Trigger Event
-            instance->handleTriggerEvent();
-            break;
         case 'A': // Alarm Activation
         case 'D': // Alarm Deactivation
             instance->handleAlarmActivation(command);
@@ -60,7 +56,6 @@ void UNOComm::processI2CCommand(int numBytes) {
             instance->handleKeypadData();
             break;
         default:
-            Serial.println("Invalid command received.");
             break;
         }
     }
@@ -79,50 +74,54 @@ void UNOComm::setRealTimeClock() {
     updateLCD();
 }
 
-void UNOComm::handleTriggerEvent() {
-    byte eventLength = Wire.read();
-    char event[eventLength + 1];
-    Wire.readBytes(event, eventLength);
-    event[eventLength] = '\0';
-    Serial.print("Trigger Event received: ");
-    Serial.println(event);
-}
-
 void UNOComm::handleKeypadData() {
-    _buzzer->keyPressSound();
     char key = Wire.read();
-    _lastKeypadInputTime = millis();
+    unsigned long currentMillis = millis();  // Current time
 
-    if (key == 'D' && !_userInputtedPassword.length() == 0) {
-        Serial.println("Delete key pressed");
-        _userInputtedPassword.remove(_userInputtedPassword.length() - 1);
-    } else if (key == 'C') {
-        _userInputtedPassword = "";
-        Serial.println("Pin code cleared.");
-    } else if (_userInputtedPassword.length() < 4 && isdigit(key)) {
-        _userInputtedPassword += key; 
-        _pinCode += '*'; 
-        Serial.print("Current pin: ");
-        Serial.println(_userInputtedPassword);
+    // If the timeout has occurred, clear the pin code
+    if (currentMillis - _lastKeypadInputTime > KEYPAD_TIMEOUT && strlen(_userInputtedPassword) > 0) {
+        memset(_pinCode, 0, sizeof(_pinCode));
+        memset(_userInputtedPassword, 0, sizeof(_userInputtedPassword));
+        if (_lcd) {
+            _lcd->setCursor(0, 1);
+            _lcd->print("                ");
+        }
     }
+    // Update the pin code if a key is pressed
+    if (isdigit(key) || key == 'D' || key == 'C') {
+        _lastKeypadInputTime = currentMillis;
 
-    if (_lcd) {
-        _lcd->setCursor(0, 1);
-        _lcd->print("                "); 
-        _lcd->setCursor(0, 1);
-        _lcd->print(_pinCode);     }
+        // Handled the delete key
+        if (key == 'D' && strlen(_userInputtedPassword) > 0) {
+            _userInputtedPassword[strlen(_userInputtedPassword) - 1] = '\0';
+            _pinCode[strlen(_pinCode) - 1] = '\0';
+        } 
+        // Handled the clear key
+        else if (key == 'C') {
+            memset(_userInputtedPassword, 0, sizeof(_userInputtedPassword));
+            memset(_pinCode, 0, sizeof(_pinCode));
+        } 
+        // Handled number keys
+        else if (strlen(_userInputtedPassword) < 4 && isdigit(key)) {
+            size_t len = strlen(_userInputtedPassword);
+            _userInputtedPassword[len] = key;
+            _userInputtedPassword[len + 1] = '\0';
+            _pinCode[len] = '*';
+            _pinCode[len + 1] = '\0';
+        }
 
-    // clear the pin code after 4 digits and after 5 seconds or if the last input was more than 5 seconds ago
-    if ((_userInputtedPassword.length() == 4 && millis() - _lastKeypadInputTime >= 5000) || 
-        (millis() - _lastKeypadInputTime >= 5000)) {
-        _pinCode = "";
-        _userInputtedPassword = "";
-        _lcd->setCursor(0, 1);
-        _lcd->print("                ");
-        Serial.println("Pin code input cleared.");
+        // Update the LCD
+        if (_lcd) {
+            _lcd->setCursor(0, 1);
+            _lcd->print("                ");
+            _lcd->setCursor(0, 1);
+            _lcd->print(_pinCode);
+        }
     }
-
 }
+
+
+
 
 
 
@@ -176,60 +175,88 @@ void UNOComm::update() {
 }
 
 void UNOComm::sendLogDataToESP32() {
-    if (_sensorLog == nullptr) {
-        Serial.println("SensorLog is null, nothing to send.");
+    if (!_sensorType || !_sensorId || !_sensorValue) {
+        Serial.println("No log data to send to ESP32.");
         return;
     }
 
-    String logData = _sensorLog->toJson();
+    // Skapa en strukturerad sträng
+    String logData = _dateTime + "|" + 
+                     *_sensorType + "|" + 
+                     *_sensorId + "|" + 
+                     (*_sensorValue ? "1" : "0");
+
     Serial.println("Sending log data to ESP32: " + logData);
 
-    if (logData.length() == 0) {
-        Serial.println("Log data is empty, not sending.");
-        return;
-    }
+    // Skicka varje tecken i strängen
     for (char c : logData) {
         Wire.write(c);
     }
-    Wire.write('\0');  // Null-terminate the string
-    Wire.endTransmission();
 
-    _sensorLog = nullptr;
-}
+    Wire.write('\0'); // Null-terminate the string
 
-void UNOComm::setSensorLog(SensorLog* sensorLog) {
-    if (sensorLog == nullptr) {
-        Serial.println("Trying to set a null SensorLog.");
-        return;
+    // Kontrollera om minne är tilldelat innan det frigörs
+    if (_sensorType) {
+        delete _sensorType;
+        _sensorType = nullptr;
     }
 
-    _sensorLog = sensorLog;
-    Serial.println("SensorLog set with data: " + _sensorLog->toJson());
+    if (_sensorId) {
+        delete _sensorId;
+        _sensorId = nullptr;
+    }
+
+    if (_sensorValue) {
+        delete _sensorValue;
+        _sensorValue = nullptr;
+    }
 }
+
+
+
+
+
+
+void UNOComm::setSensorLog(const char* sensorType, const char* sensorId, bool value) {
+    // Kontrollera om tidigare minne är tilldelat och frigör det
+    if (_sensorType) {
+        delete _sensorType;
+        _sensorType = nullptr;
+    }
+    if (_sensorId) {
+        delete _sensorId;
+        _sensorId = nullptr;
+    }
+    if (_sensorValue) {
+        delete _sensorValue;
+        _sensorValue = nullptr;
+    }
+
+    // Tilldela nytt minne och sätt värdena
+    _sensorType = new String(sensorType);
+    _sensorId = new String(sensorId);
+    _sensorValue = new bool(value);
+}
+
 
 void UNOComm::setBuzzer(Buzzer *buzzer) {
     this->_buzzer = buzzer;
 }
 
-SensorLog* UNOComm::getSensorLog() {
-    return _sensorLog;
-}
 
 void UNOComm::switchState() {
     if (_alarmActivated) {
         _alarmActivated = false;
         _lcd->print("Alarm Deactivated");
-        Serial.println("Switching state to Deactivated");
+        _buzzer->alarmInactiveSound();
     } else {
         _alarmActivated = true;
         _lcd->print("Alarm Activated");
-        Serial.println("Switching state to Activated");
+        _buzzer->alarmActiveSound();
     }
 }
 
 bool UNOComm::getState() const {
-    Serial.print("Current state is: ");
-    Serial.println(_alarmActivated ? "Activated" : "Deactivated");
     return _alarmActivated;
 }
 
@@ -237,3 +264,7 @@ void UNOComm::onRequest() {
     if (instance != nullptr)
         instance->sendLogDataToESP32();
 }
+
+
+
+

@@ -59,24 +59,60 @@ void ESP32Comm::sendKeypadData(char key) {
   Wire.endTransmission();
 }
 
-void ESP32Comm::requestDataFromPeripheral(HttpsRequest& httpsRequest) {
+struct SensorData {
+  String id;
+  String type;
+  String timestamp;
+  String sensorType;
+  String sensorId;
+  bool sensorValue;
 
-  String message{};
-  JsonDocument doc;
-
-  Wire.requestFrom(ARDUINO_I2C_ADDRESS, (uint8_t)16);
-  while (Wire.available()) {
-    char c = Wire.read();
-    message += c;
+   String toJson() const {
+    JsonDocument doc;
+    doc["id"] = generateUUID();
+    doc["type"] = "sensor_log";
+    doc["timestamp"] = timestamp;
+    doc["sensorType"] = sensorType;
+    doc["sensorId"] = sensorId;
+    doc["sensorValue"] = sensorValue;
+    String output;
+    serializeJson(doc, output);
+    return output;
   }
+};
 
-  Serial.println(message);
-  Serial.println(message.length());
+void ESP32Comm::requestDataFromPeripheral(HttpsRequest& httpsRequest) {
+    SensorData sensorData;
+    String receivedData = "";
 
-  /* if(message.length() != 0) {
-    deserializeJson(doc, message);
-    httpsRequest.sendSensorLogToCosmo(doc);
-  } */
+    Wire.requestFrom(ARDUINO_I2C_ADDRESS, (uint8_t)32); // Request up to 32 bytes
 
-  
+    while (Wire.available()) {
+        char c = Wire.read();
+        if (c == '\0') break; // Sluta läsa vid null-terminator
+        receivedData += c;
+    }
+
+    Serial.println("Received data: " + receivedData);
+
+    // Dela upp strängen i sina komponenter
+    int firstSep = receivedData.indexOf('|');
+    int secondSep = receivedData.indexOf('|', firstSep + 1);
+    int thirdSep = receivedData.indexOf('|', secondSep + 1);
+
+    sensorData.timestamp = receivedData.substring(0, firstSep);
+    sensorData.sensorType = receivedData.substring(firstSep + 1, secondSep);
+    sensorData.sensorId = receivedData.substring(secondSep + 1, thirdSep);
+    sensorData.sensorValue = receivedData.substring(thirdSep + 1) == "1";
+
+    // Kontrollera om all data har tagits emot
+    if (!sensorData.timestamp.isEmpty() && !sensorData.sensorType.isEmpty() && !sensorData.sensorId.isEmpty()) {
+        httpsRequest.sendSensorLogToCosmo(sensorData.toJson());
+        Serial.println("Sensor data sent to Cosmo");
+    } else {
+        Serial.println("Failed to parse received data.");
+    }
 }
+
+
+

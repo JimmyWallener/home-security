@@ -261,8 +261,8 @@ void HttpsRequest::sendAccessLog(const String userId, const String timestamp, co
     https.setReuse(false);
 
     // Update URL and resource link for logs
-    String url = AZURE_COSMO_DB_URI + "dbs/" + AZURE_COSMO_DB_NAME + "/colls/Logs/docs";
-    String resourceLink = "dbs/" + AZURE_COSMO_DB_NAME + "/colls/Logs";
+    String url = AZURE_COSMO_DB_URI + "dbs/" + AZURE_COSMO_DB_NAME + "/colls/" + AZURE_COSMO_DB_ALARM_CONTAINER + "/docs";
+    String resourceLink = "dbs/" + AZURE_COSMO_DB_NAME + "/colls/" + AZURE_COSMO_DB_ALARM_CONTAINER;
     String authorizationToken = generateAuthToken("POST", "docs", resourceLink, date);
 
     https.begin(*client, url.c_str());
@@ -291,7 +291,7 @@ void HttpsRequest::sendAccessLog(const String userId, const String timestamp, co
     delete client;
 }
 
-void HttpsRequest::sendSensorLogToCosmo(const JsonDocument& doc) {
+void HttpsRequest::sendSensorLogToCosmo(const String &doc) {
     const char *rootCA = ROOT_CA;
     if (!_wifiManager->isConnected()) {
         Serial.println("WiFi is not connected");
@@ -318,8 +318,8 @@ void HttpsRequest::sendSensorLogToCosmo(const JsonDocument& doc) {
     https.setReuse(false);
 
     // Update URL and resource link for logs
-    String url = AZURE_COSMO_DB_URI + "dbs/" + AZURE_COSMO_DB_NAME + "/colls/SensorLog/docs";
-    String resourceLink = "dbs/" + AZURE_COSMO_DB_NAME + "/colls/SensorLog";
+    String url = AZURE_COSMO_DB_URI + "dbs/" + AZURE_COSMO_DB_NAME + "/colls/"+ AZURE_COSMO_DB_SENSOR_CONTAINER + "/docs";
+    String resourceLink = "dbs/" + AZURE_COSMO_DB_NAME + "/colls/" + AZURE_COSMO_DB_SENSOR_CONTAINER;
     String authorizationToken = generateAuthToken("POST", "docs", resourceLink, date);
 
     https.begin(*client, url.c_str());
@@ -329,13 +329,10 @@ void HttpsRequest::sendSensorLogToCosmo(const JsonDocument& doc) {
     https.addHeader("Authorization", authorizationToken);
     https.addHeader("x-ms-date", date);
     https.addHeader("x-ms-version", "2018-12-31");
-    https.addHeader("x-ms-documentdb-partitionkey", "[\"sensor_data\"]");
+    https.addHeader("x-ms-documentdb-partitionkey", "[\"sensor_log\"]");
 
-    // Send the log data
-    String logData;
-
-    serializeJson(doc, logData);
-    int httpResponseCode = https.POST(logData);
+   
+    int httpResponseCode = https.POST(doc);
 
     if (httpResponseCode > 0) {
         String response = https.getString();

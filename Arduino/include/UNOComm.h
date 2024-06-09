@@ -5,7 +5,6 @@
 #include <RTClib.h>
 #include <SPI.h>
 #include "LCD.h"
-#include "SensorLog.h"
 #include "Components.h"
 #include "Buzzer.h"
 
@@ -15,22 +14,23 @@ public:
     ~UNOComm() override;
     void initialize() override;
     void setLCD(LCD*);
-    void setSensorLog(SensorLog*);
+    void setSensorLog(const char*, const char*, const bool);
     void setBuzzer(Buzzer*);
     static UNOComm *instance;
     String getRealTimeClock();
-    SensorLog *getSensorLog();
     void updateLCD();
     void update();
     bool getState() const;
 
 private:
     String _dateTime{};
+    String* _sensorType{nullptr};
+    String* _sensorId{nullptr};
+    bool* _sensorValue{nullptr};
     LCD *_lcd;
-    SensorLog *_sensorLog{nullptr};
     Buzzer *_buzzer;
-    String _pinCode{};
-    String _userInputtedPassword;
+    char _pinCode[5]{""};
+    char _userInputtedPassword[5]{""};
     uint8_t _state = 0;
     unsigned long _lastKeypadInputTime{0};
     bool _alarmActivated = false;
@@ -40,7 +40,6 @@ private:
     static void onReceive(int);
     static void onRequest();
     unsigned long _messageClearTime{0};
-    void handleTriggerEvent();
     void switchState();
     void processI2CCommand(int);
     void setRealTimeClock();
@@ -49,7 +48,6 @@ private:
     void handlePinCodeFeedback();
     void displayTemporaryMessage(const String&, unsigned long);
     void sendLogDataToESP32();
-
 };
 
 #endif // UNOCOMM_H

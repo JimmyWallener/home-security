@@ -15,7 +15,7 @@ struct AccessLog {
     String toJson() const {
         JsonDocument doc;
         doc["id"] = generateUUID();
-        doc["Type"] = type;
+        doc["type"] = type;
         doc["timestamp"] = timestamp;
         doc["userId"] = userId;
         doc["action"] = action;

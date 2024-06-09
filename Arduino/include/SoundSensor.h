@@ -10,7 +10,9 @@ class SoundSensor : public Component {
 private:
     int _digitalValue;
     uint8_t _digitalPinNumber;
-    
+    unsigned long _lastTriggerTime;
+    unsigned long _triggerThreshold;
+
 public:
     SoundSensor() : _digitalValue(0), _digitalPinNumber(0) {}
     SoundSensor(uint8_t);

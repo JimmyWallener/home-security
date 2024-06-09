@@ -37,7 +37,6 @@ int PIRSensor::update() {
         unsigned long currentTime = millis();
         if (currentTime - _lastTriggerTime > _triggerThreshold) {
             _lastTriggerTime = currentTime;
-            Serial.println("PIR Sensor Triggered");
             return 1;
         }
     }
