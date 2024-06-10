@@ -1,0 +1,31 @@
+<map id="ESP32/include/ESP32Comm.h" name="ESP32/include/ESP32Comm.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="125,5,337,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,152,69,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,33,87,51,67,64,50,80,42,93,38,108,37,138,31,138,33,107,37,91,46,77,64,60,84,46,130,28"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="217,152,327,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="237,30,252,78,268,138,263,139,247,79,232,32"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="99,152,173,177"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="232,32,224,66,206,105,188,128,167,146,163,142,184,124,202,103,219,64,226,31"/>
+<area shape="rect" id="Node000005" href="$RealTimeClock_8h.html" title=" " alt="" coords="61,79,193,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="215,33,157,73,154,68,212,28"/>
+<area shape="rect" id="Node000006" href="$HttpsRequest_8h.html" title=" " alt="" coords="405,79,528,104"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="269,28,416,72,415,77,268,33"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="114,106,64,145,61,141,111,102"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="131,104,135,138,130,139,126,105"/>
+<area shape="poly" id="edge9_Node000006_Node000003" title=" " alt="" coords="436,107,317,150,316,145,434,102"/>
+<area shape="poly" id="edge15_Node000006_Node000006" title=" " alt="" coords="507,76,539,77,550,82,555,91,552,99,544,104,520,107,520,102,542,99,547,96,549,91,546,86,537,82,507,81"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="555,152,661,177"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="491,102,574,143,572,148,488,106"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="627,225,771,251"/>
+<area shape="poly" id="edge10_Node000006_Node000008" title=" " alt="" coords="529,92,565,98,604,109,642,126,675,150,686,164,693,180,700,211,695,212,688,181,681,167,671,154,640,130,603,114,564,103,528,98"/>
+<area shape="rect" id="Node000009" href="$WifiManager_8h.html" title=" " alt="" coords="736,152,851,177"/>
+<area shape="poly" id="edge11_Node000006_Node000009" title=" " alt="" coords="520,101,728,146,726,152,519,107"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="374,225,458,251"/>
+<area shape="poly" id="edge14_Node000006_Node000011" title=" " alt="" coords="444,106,415,126,403,138,393,153,389,168,391,183,403,213,398,215,385,185,384,167,388,151,399,135,412,122,441,102"/>
+<area shape="rect" id="Node000012" href="$generateUUID_8h.html" title=" " alt="" coords="403,152,530,177"/>
+<area shape="poly" id="edge16_Node000006_Node000012" title=" " alt="" coords="469,104,469,138,464,138,464,104"/>
+<area shape="poly" id="edge13_Node000009_Node000008" title=" " alt="" coords="780,179,727,219,724,215,777,175"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="795,225,858,251"/>
+<area shape="poly" id="edge12_Node000009_Node000010" title=" " alt="" coords="801,177,818,212,813,214,796,179"/>
+<area shape="poly" id="edge17_Node000012_Node000011" title=" " alt="" coords="460,179,434,216,430,213,456,176"/>
+</map>

@@ -6,20 +6,21 @@
 #include <WiFiClientSecure.h>
 #include "WifiManager.h"
 #include <Arduino.h>
-#include "MQTT.h"
+#include "HttpsRequest.h"
+#include "generateUUID.h"
 
 
 class HttpsRequest {
     public:
         HttpsRequest(WifiManager*);
+        ~HttpsRequest();
         bool isPinCodeValid(String);
+        void sendSensorLogToCosmo(const String&);
         void syncTime();
 
     private:
         WifiManager* _wifiManager{nullptr};
-        MQTT* _mqtt{nullptr};
-        
-        String generateAuthToken(const String&, const String&, const String&, const String&);
+        String generateAuthToken(const String &, const String &, const String &, const String &);
         void sendAccessLog(const String, const String, const String, const bool);
 };
 

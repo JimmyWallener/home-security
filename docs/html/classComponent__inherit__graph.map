@@ -1,0 +1,13 @@
+<map id="Component" name="Component">
+<area shape="rect" id="Node000001" title=" " alt="" coords="163,5,261,31"/>
+<area shape="rect" id="Node000002" href="$classBuzzer.html" title=" " alt="" coords="5,79,72,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,38,68,81,66,76,171,33"/>
+<area shape="rect" id="Node000003" href="$classLCD.html" title=" " alt="" coords="96,79,144,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="188,41,137,81,133,76,185,37"/>
+<area shape="rect" id="Node000004" href="$classPIRSensor.html" title=" " alt="" coords="169,79,255,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="215,44,215,79,209,79,209,44"/>
+<area shape="rect" id="Node000005" href="$classSoundSensor.html" title=" " alt="" coords="280,79,387,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="245,35,315,76,312,81,242,40"/>
+<area shape="rect" id="Node000006" href="$classUNOComm.html" title=" " alt="" coords="411,79,506,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="265,32,419,76,418,81,264,37"/>
+</map>

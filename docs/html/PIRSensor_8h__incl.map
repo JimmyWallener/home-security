@@ -1,0 +1,8 @@
+<map id="Arduino/include/PIRSensor.h" name="Arduino/include/PIRSensor.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,208,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="65,152,149,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,32,94,53,87,79,88,110,97,139,92,140,82,111,81,78,89,52,98,30"/>
+<area shape="rect" id="Node000003" href="$Components_8h.html" title=" " alt="" coords="97,79,213,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="117,30,142,66,137,69,112,33"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="149,106,124,142,120,139,145,103"/>
+</map>

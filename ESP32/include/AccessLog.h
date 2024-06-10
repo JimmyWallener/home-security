@@ -2,8 +2,10 @@
 #define ACCESSLOG_H
 
 #include <ArduinoJson.h>
+#include "generateUUID.h"
 
 struct AccessLog {
+    String id;
     String type = "login_log";
     String timestamp;
     String userId = "Unknown";
@@ -12,6 +14,7 @@ struct AccessLog {
 
     String toJson() const {
         JsonDocument doc;
+        doc["id"] = generateUUID();
         doc["type"] = type;
         doc["timestamp"] = timestamp;
         doc["userId"] = userId;
@@ -22,5 +25,7 @@ struct AccessLog {
         return json;
     }
 };
+
+
 
 #endif // ACCESSLOG_H

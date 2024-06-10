@@ -6,6 +6,7 @@
 #include "Buzzer.h"
 #include "PIRSensor.h"
 #include "UNOComm.h"
+#include "SensorTypes.h"
 
 using namespace constants;
 
@@ -17,79 +18,107 @@ Buzzer *buzzer = new Buzzer(BUZZER_PIN, BUZZER_DELAY_TIME);
 PIRSensor *pirSensor = new PIRSensor(PASSIVE_IR_SENSOR_PIN);
 UNOComm *unoComm = new UNOComm;
 
-extern int __heap_start, *__brkval;
-
-int freeMemory() {
-    int v;
-    return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
-}
-
 void run();
 
+/**
+ * @brief Arduino setup function.
+ * 
+ * This function initializes serial communication, creates an array of component pointers,
+ * adds them to the Components instance, and initializes all components. 
+ * It also sets up the LCD and buzzer components in the UNOComm instance.
+ */
 void setup() {
     Serial.begin(115200);
 
-    Serial.println("Free memory: ");
-    Serial.println(freeMemory());
-
     Component *componentArray[] = {soundSensor, lcd, buzzer, pirSensor, unoComm};
     int numberOfComponents = sizeof(componentArray) / sizeof(componentArray[0]);
-    Serial.print("Number of components to add: ");
-    Serial.println(numberOfComponents);
 
     components.addComponent(componentArray, numberOfComponents);
-    Serial.println("Components added");
     delay(1000);
     components.initializeAll();
     delay(1000);
     unoComm->setLCD(lcd);
     unoComm->setBuzzer(buzzer);
-    Serial.println("Components initialized");
     delay(1000);
 }
 
-bool playingAlarm = true;
-int alarmCount = 0;
-int timeCounter = 0; 
-
+/**
+ * @brief Arduino main loop function.
+ * 
+ * This function continuously calls the run function every 10 milliseconds.
+ */
 void loop() {
     delay(10);
     run();
 }
 
+bool playingAlarm{true};
+uint16_t alarmCount{0};
+uint16_t sensorCount{0};
+unsigned short timeCounter{0};
+unsigned long lastMotionTime{0};
+unsigned long lastSoundTime{0};
+
+/**
+ * @brief Main run function for the alarm system.
+ * 
+ * This function handles the main logic of the alarm system. It checks for motion and sound detection,
+ * updates the state of the buzzer and UNOComm, and triggers the alarm if necessary.
+ */
 void run() {
-    if(unoComm->getState()) {
+    unsigned long currentTime = millis();
+
+    if (unoComm->getState()) {
         buzzer->update();
         unoComm->update();
 
-        // Få denna att funka
-        if(pirSensor->isMotionDetected()) {
-            alarmCount++;
+        bool motionDetected = pirSensor->isMotionDetected();
+        bool soundDetected = soundSensor->isSoundDetected();
+
+        if (motionDetected) {
+            lastMotionTime = currentTime;
+            sensorCount++;
+            if (sensorCount >= SENSOR_THRESHOLD) {
+                unoComm->setSensor(MOTION_SENSOR);
+                alarmCount++;
+                sensorCount = 0;
+            }
         }
 
-        if(soundSensor->isSoundDetected()) {
-            alarmCount++;
+        if (soundDetected) {
+            lastSoundTime = currentTime;
+            sensorCount++;
+            if (sensorCount >= SENSOR_THRESHOLD) {
+                unoComm->setSensor(SOUND_SENSOR);
+                alarmCount++;
+                sensorCount = 0;
+            }
         }
-        // bort med magical number
-        if(alarmCount >= SENSOR_OCCURENCES) {
+
+        // Check if no motion or sound has been detected for a while
+        if (!motionDetected && !soundDetected && (currentTime - lastMotionTime > RESET_DELAY) && (currentTime - lastSoundTime > RESET_DELAY)) {
             alarmCount = 0;
-            while(playingAlarm) {
+        }
+
+        // Trigger alarm if the sensor has been triggered SENSOR_OCCURENCES times
+        if (alarmCount >= SENSOR_OCCURENCES) {
+            alarmCount = 0;
+            while (playingAlarm) {
                 buzzer->playAlarm();
                 buzzer->update();
                 unoComm->update();
-                if(!unoComm->getState()) {
+                if (!unoComm->getState()) {
                     playingAlarm = false;
+                    buzzer->alarmInactiveSound();
                 }
             }
         }
         timeCounter++;
-        // bort med magical number
-        if(timeCounter > COUNTER_DURATION) {
+        if (timeCounter > COUNTER_DURATION) {
             timeCounter = 0;
             alarmCount = 0;
         }
         playingAlarm = true;
-    
     } else {
         buzzer->update();
         unoComm->update();
