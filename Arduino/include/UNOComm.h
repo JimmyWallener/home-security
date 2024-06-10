@@ -7,6 +7,7 @@
 #include "LCD.h"
 #include "Components.h"
 #include "Buzzer.h"
+#include "SensorTypes.h"
 
 class UNOComm : public Component {
 public:
@@ -14,7 +15,7 @@ public:
     ~UNOComm() override;
     void initialize() override;
     void setLCD(LCD*);
-    void setSensorLog(const char*, const char*, const bool);
+    void setSensor(SensorType);
     void setBuzzer(Buzzer*);
     static UNOComm *instance;
     String getRealTimeClock();
@@ -24,9 +25,7 @@ public:
 
 private:
     String _dateTime{};
-    String* _sensorType{nullptr};
-    String* _sensorId{nullptr};
-    bool* _sensorValue{nullptr};
+    SensorType _sensorType{NO_SENSOR};
     LCD *_lcd;
     Buzzer *_buzzer;
     char _pinCode[5]{""};

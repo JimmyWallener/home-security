@@ -1,0 +1,24 @@
+<map id="Arduino/include/UNOComm.h" name="Arduino/include/UNOComm.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="195,5,407,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,69,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="260,33,83,80,82,75,258,28"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="93,79,168,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="275,33,172,76,170,71,273,28"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="193,79,247,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="290,33,245,72,242,68,287,29"/>
+<area shape="rect" id="Node000005" href="$LCD_8h.html" title=" " alt="" coords="271,79,331,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="304,31,304,65,299,65,299,31"/>
+<area shape="rect" id="Node000007" href="$Components_8h.html" title=" " alt="" coords="311,152,427,177"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="313,29,345,77,366,138,361,139,340,80,309,32"/>
+<area shape="rect" id="Node000009" href="$Buzzer_8h.html" title=" " alt="" coords="407,79,484,104"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="326,28,411,70,408,75,323,33"/>
+<area shape="rect" id="Node000010" href="$SensorTypes_8h.html" title=" " alt="" coords="508,79,623,104"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="344,28,510,72,509,78,343,33"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="169,152,287,177"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="291,106,252,144,248,140,287,102"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="314,102,351,140,347,144,311,106"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="375,225,459,251"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="379,176,404,213,400,216,375,179"/>
+<area shape="poly" id="edge11_Node000009_Node000007" title=" " alt="" coords="435,106,394,144,390,141,431,102"/>
+<area shape="poly" id="edge10_Node000009_Node000008" title=" " alt="" coords="448,104,447,138,441,178,430,213,425,212,436,177,441,137,443,104"/>
+</map>

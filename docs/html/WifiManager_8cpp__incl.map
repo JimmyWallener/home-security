@@ -1,0 +1,9 @@
+<map id="ESP32/src/WifiManager.cpp" name="ESP32/src/WifiManager.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,203,31"/>
+<area shape="rect" id="Node000002" href="$WifiManager_8h.html" title=" " alt="" coords="47,79,161,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,31,107,65,101,65,101,31"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="9,152,71,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="95,106,61,144,57,140,91,103"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="96,152,240,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="117,103,151,140,147,144,113,106"/>
+</map>

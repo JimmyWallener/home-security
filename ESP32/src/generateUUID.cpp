@@ -1,5 +1,9 @@
 #include "generateUUID.h"
 
+/// @brief Generates a universally unique identifier (UUID) in string format.
+/// This function generates a UUID using random numbers. The UUID format is 8-4-4-4-12 hexadecimal digits,
+/// which is typical for UUIDs and ensures uniqueness.
+/// @return A string containing the generated UUID.
 String generateUUID() {
     // Buffer to store UUID
     char uuid[37];

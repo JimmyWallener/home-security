@@ -14,7 +14,6 @@ public:
     ESP32Comm();
     void begin();
     void sendRtcData(RealTimeClock&);
-    void sendTriggerEvent(const char*);
     void sendAlarmActivationChange(bool);
     void sendPinCodeFeedback(bool, int );
     void sendKeypadData(char);

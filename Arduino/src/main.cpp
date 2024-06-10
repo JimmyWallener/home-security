@@ -6,7 +6,7 @@
 #include "Buzzer.h"
 #include "PIRSensor.h"
 #include "UNOComm.h"
-
+#include "SensorTypes.h"
 
 using namespace constants;
 
@@ -20,7 +20,13 @@ UNOComm *unoComm = new UNOComm;
 
 void run();
 
-
+/**
+ * @brief Arduino setup function.
+ * 
+ * This function initializes serial communication, creates an array of component pointers,
+ * adds them to the Components instance, and initializes all components. 
+ * It also sets up the LCD and buzzer components in the UNOComm instance.
+ */
 void setup() {
     Serial.begin(115200);
 
@@ -36,13 +42,15 @@ void setup() {
     delay(1000);
 }
 
-
+/**
+ * @brief Arduino main loop function.
+ * 
+ * This function continuously calls the run function every 10 milliseconds.
+ */
 void loop() {
     delay(10);
     run();
 }
-
-
 
 bool playingAlarm{true};
 uint16_t alarmCount{0};
@@ -51,7 +59,12 @@ unsigned short timeCounter{0};
 unsigned long lastMotionTime{0};
 unsigned long lastSoundTime{0};
 
-
+/**
+ * @brief Main run function for the alarm system.
+ * 
+ * This function handles the main logic of the alarm system. It checks for motion and sound detection,
+ * updates the state of the buzzer and UNOComm, and triggers the alarm if necessary.
+ */
 void run() {
     unsigned long currentTime = millis();
 
@@ -66,7 +79,7 @@ void run() {
             lastMotionTime = currentTime;
             sensorCount++;
             if (sensorCount >= SENSOR_THRESHOLD) {
-                unoComm->setSensorLog("motion", "pirSensor", true);
+                unoComm->setSensor(MOTION_SENSOR);
                 alarmCount++;
                 sensorCount = 0;
             }
@@ -76,7 +89,7 @@ void run() {
             lastSoundTime = currentTime;
             sensorCount++;
             if (sensorCount >= SENSOR_THRESHOLD) {
-                unoComm->setSensorLog("sound", "soundSensor", true);
+                unoComm->setSensor(SOUND_SENSOR);
                 alarmCount++;
                 sensorCount = 0;
             }
@@ -111,7 +124,3 @@ void run() {
         unoComm->update();
     }
 }
-
-
-
-
